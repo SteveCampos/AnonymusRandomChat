@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="apps.steve.fire.randomchat.SearchChat"
+    tools:showIn="@layout/activity_search_chat">
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <android.support.v7.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.CardView
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/card_margin"
+                style="@style/CardViewStyle">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/padding_vertical"
+                    android:paddingBottom="@dimen/padding_vertical">
+
+                    <ImageView
+                        android:layout_width="144dp"
+                        android:layout_height="144dp"
+                        android:id="@+id/imageview_avatar"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:src="@drawable/girl_2"
+                        android:contentDescription="avatar" />
+
+                    <Spinner
+                        style="@style/Widget.MyApp.HeaderBar.Spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:id="@+id/text_range_age"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        />
+
+                    <org.angmarch.circledpicker.CircledPicker
+                        android:id="@+id/circled_picker_edad"
+                        android:layout_width="96dp"
+                        android:layout_height="96dp"
+                        app:pickerMode="numeric"
+                        app:maxValue="60"
+                        app:step="2"
+                        app:lineColor="@color/primary"
+                        app:textColorCirclePicker="@color/primary"
+                        app:textSize="16sp"
+                        app:subLineColor="@color/white_alpha"
+                        android:layout_below="@+id/text_range_age"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginRight="12dp"
+                        >
+
+                    </org.angmarch.circledpicker.CircledPicker>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Young Boy"
+                        android:id="@+id/textview_age_group"
+                        android:layout_below="@+id/text_groupname"
+                        android:layout_alignLeft="@+id/text_groupname"
+                        android:layout_alignStart="@+id/text_groupname"
+                        android:layout_toStartOf="@+id/text_range_age"
+                        android:layout_toLeftOf="@+id/text_range_age"  />
+
+                    <TextView
+                        android:id="@+id/text_groupname"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/article_emisor"
+                        android:layout_alignParentTop="true"
+                        android:layout_toRightOf="@+id/imageview_avatar"
+                        android:layout_toEndOf="@+id/imageview_avatar"/>
+                </RelativeLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/card_margin"
+                style="@style/CardViewStyle">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/padding_vertical"
+                    android:paddingBottom="@dimen/padding_vertical">
+
+
+                    <ImageView
+                        android:layout_width="144dp"
+                        android:layout_height="144dp"
+                        android:id="@+id/imageview_receptor"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:src="@drawable/girl_2"
+                        android:contentDescription="avatar" />
+
+
+                    <Spinner
+                        style="@style/Widget.MyApp.HeaderBar.Spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:id="@+id/spinner_genero_receptor"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/article_girl"
+                        android:id="@+id/textview_genero_articulo_receptor"
+                        android:layout_alignParentTop="true"
+                        android:layout_toRightOf="@+id/imageview_receptor"
+                        android:layout_toEndOf="@+id/imageview_receptor" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Young Girl, Woman, Mature Woman"
+                        android:id="@+id/text_age_group"
+                        android:layout_below="@+id/textview_genero_articulo_receptor"
+                        android:layout_alignLeft="@+id/textview_genero_articulo_receptor"
+                        android:layout_alignStart="@+id/textview_genero_articulo_receptor"
+                        android:layout_toStartOf="@+id/spinner_genero_receptor"
+                        android:layout_toLeftOf="@+id/spinner_genero_receptor" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="18 - 30"
+                        android:id="@+id/text_age_range"
+                        android:textColor="@color/primary"
+                        android:textSize="@dimen/text_medium"
+                        android:layout_below="@+id/spinner_genero_receptor"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginRight="@dimen/activity_horizontal_margin" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/text_age_range"
+                        android:layout_alignLeft="@+id/text_age_group"
+                        android:layout_alignStart="@+id/text_age_group"
+                        >
+
+                        <com.appyvet.rangebar.RangeBar
+                            xmlns:custom="http://schemas.android.com/apk/res-auto"
+                            android:id="@+id/range_bar_edad_receptor"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            custom:tickStart="18"
+                            custom:pinMaxFont="10sp"
+                            custom:tickInterval="2"
+                            custom:tickEnd="60"
+                            custom:tickColor="@color/primary"
+                            custom:pinColor="@color/primary"
+                            custom:selectorColor="@color/primary"
+                            custom:textColor="@android:color/white"
+                            custom:connectingLineColor="@color/primary"
+                            custom:rangeBarColor="@android:color/white" />
+                    </LinearLayout>
+
+                    <!--<org.angmarch.circledpicker.CircledPicker
+                        android:id="@+id/circled_picker_edad_receptor"
+                        android:layout_width="96dp"
+                        android:layout_height="96dp"
+                        app:pickerMode="numeric"
+                        app:maxValue="60"
+                        app:step="2"
+                        android:layout_below="@+id/spinnerGeneroReceptor"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginRight="12dp"
+                        >
+
+                    </org.angmarch.circledpicker.CircledPicker>-->
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+        </android.support.v7.widget.LinearLayoutCompat>
+
+    </android.support.v4.widget.NestedScrollView>
+</android.support.v7.widget.LinearLayoutCompat>

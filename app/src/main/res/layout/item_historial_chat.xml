@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_historial"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+    android:layout_marginRight="@dimen/activity_horizontal_margin"
+    android:foreground="?android:attr/selectableItemBackground"
+    card_view:cardBackgroundColor="@color/white"
+    card_view:cardPreventCornerOverlap="false"
+    card_view:cardUseCompatPadding="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp">
+
+        <ImageView
+            android:id="@+id/imageview_avatar"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="avatar"
+            android:src="@drawable/girl_2" />
+
+        <TextView
+            android:id="@+id/text_title"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/imageview_avatar"
+            android:layout_toRightOf="@+id/imageview_avatar"
+            android:layout_toLeftOf="@+id/text_time"
+            android:layout_toStartOf="@+id/text_time"
+            android:text="18 Chico"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="14sp"
+            />
+        <TextView
+            android:layout_marginTop="4dp"
+            android:id="@+id/text_last_message"
+            android:drawablePadding="4dp"
+            style="@style/TextAppearance.AppCompat.Small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/text_title"
+            android:layout_alignStart="@+id/text_title"
+            android:layout_below="@+id/text_title"
+            android:text="The music is for the sad men. I want to be Forever young."
+            android:layout_toLeftOf="@+id/text_counter"
+            android:layout_toStartOf="@+id/text_counter"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:gravity="center_vertical"
+            />
+
+        <TextView
+            android:id="@+id/text_time"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="16dp"
+            android:text="18:00 PM"
+            />
+
+        <TextView
+            android:id="@+id/text_counter"
+            android:layout_marginTop="4dp"
+            style="@style/TextAppearance.AppCompat.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignLeft="@+id/text_time"
+            android:layout_below="@+id/text_time"
+            android:text=""
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:background="@drawable/badge_circle"
+            android:visibility="invisible"
+            />
+
+        <!--
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btn_chat"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:text="@string/historial_action_chat" />-->
+<!--
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/text_last_message"
+            android:layout_toEndOf="@+id/imageview_avatar"
+            android:layout_toRightOf="@+id/imageview_avatar"
+            android:orientation="horizontal">
+
+            <com.like.LikeButton
+                android:id="@+id/star_button"
+                app:icon_size="20dp"
+                app:icon_type="star"
+                app:liked="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.like.LikeButton
+                android:id="@+id/hot_button"
+                app:circle_end_color="@color/accent"
+                app:circle_start_color="@color/accent"
+                app:dots_primary_color="@color/accent"
+                app:dots_secondary_color="@color/red_400"
+                app:icon_size="20dp"
+                app:like_drawable="@drawable/ic_whatshot_red_24dp"
+                app:liked="true"
+                app:unlike_drawable="@drawable/ic_whatshot_grey_24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.like.LikeButton
+                android:id="@+id/like_button"
+                app:circle_end_color="@android:color/holo_blue_dark"
+                app:circle_start_color="@android:color/holo_blue_bright"
+                app:dots_primary_color="@android:color/holo_blue_light"
+                app:dots_secondary_color="@android:color/holo_blue_dark"
+                app:icon_size="20dp"
+                app:like_drawable="@drawable/thumb_on"
+                app:liked="true"
+                app:unlike_drawable="@drawable/thumb_off"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>-->
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

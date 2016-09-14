@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/cardview"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        style="@style/CardViewStyle"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:id="@+id/imageview_avatar"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/girl_2"
+                android:contentDescription="avatar" />
+
+            <TextView
+                android:id="@+id/text_title"
+                style="@style/TextAppearance.AppCompat.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="18 Young Girl, Milf Girl"
+                android:layout_alignParentTop="true"
+                android:layout_toRightOf="@+id/imageview_avatar"
+                android:layout_toEndOf="@+id/imageview_avatar"
+                android:layout_toStartOf="@+id/text_hots"
+                android:layout_toLeftOf="@+id/text_hots"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="16sp"
+                />
+            <TextView
+                android:id="@+id/text_hots"
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginRight="16dp"
+                android:text=""
+                android:drawableRight="@drawable/ic_whatshot_red_24dp"/>
+
+            <TextView
+                android:id="@+id/text_state"
+                android:layout_below="@+id/text_title"
+                style="@style/TextAppearance.AppCompat.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="El sin sentido es inmanente a la existencia. Anoche encontré a un martir en mi cama, me preguntó, quién soy, que es lo que estoy defendiendo."
+                android:layout_alignLeft="@+id/text_title"
+                android:layout_alignStart="@+id/text_title"
+                android:layout_toStartOf="@+id/text_hots"
+                android:layout_toLeftOf="@+id/text_hots"
+                android:ellipsize="end"
+                android:maxLines="2" />
+
+
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btn_chat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:text="@string/historial_action_chat"
+                android:layout_below="@+id/text_state"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true">
+            </android.support.v7.widget.AppCompatButton>
+
+            <!--
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_below="@+id/text_state"
+                android:layout_toRightOf="@+id/imageview_avatar"
+                android:layout_toEndOf="@+id/imageview_avatar">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    >
+                <com.like.LikeButton
+                    app:liked="true"
+                    android:id="@+id/star_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:icon_size="20dp"
+                    app:icon_type="star"/>
+                    <TextView
+                        android:layout_marginTop="-16dp"
+                        android:id="@+id/text_stars_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="24"
+                        android:layout_gravity="center"
+                        style="@style/TextAppearance.AppCompat.Small"
+                        />
+
+                </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+                <com.like.LikeButton
+                    android:id="@+id/hot_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:circle_end_color="@color/accent"
+                    app:circle_start_color="@color/accent"
+                    app:dots_primary_color="@color/accent"
+                    app:dots_secondary_color="@color/red_400"
+                    app:icon_size="20dp"
+                    app:like_drawable="@drawable/ic_whatshot_red_24dp"
+                    app:unlike_drawable="@drawable/ic_whatshot_grey_24dp"
+                    app:liked="true" />
+                <TextView
+                    android:layout_marginTop="-16dp"
+                    android:id="@+id/text_hots_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="24"
+                    android:layout_gravity="center"
+                    style="@style/TextAppearance.AppCompat.Small"
+                    />
+            </LinearLayout>
+            <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+                <com.like.LikeButton
+                    android:id="@+id/like_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:circle_end_color="@android:color/holo_blue_dark"
+                    app:circle_start_color="@android:color/holo_blue_bright"
+                    app:dots_primary_color="@android:color/holo_blue_light"
+                    app:dots_secondary_color="@android:color/holo_blue_dark"
+                    app:icon_size="20dp"
+                    app:like_drawable="@drawable/thumb_on"
+                    app:unlike_drawable="@drawable/thumb_off"
+                    app:liked="true"
+                    />
+                <TextView
+                    android:layout_marginTop="-16dp"
+                    android:id="@+id/text_likes_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="24"
+                    android:layout_gravity="center"
+                    style="@style/TextAppearance.AppCompat.Small"
+                    />
+            </LinearLayout>
+            </LinearLayout>-->
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>

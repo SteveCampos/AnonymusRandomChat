@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="white">@android:color/white</color>
+    <color name="chat_user_reply_background_color">#c8f0ff</color>
+    <color name="chat_company_reply_background_color">#F5F5F5</color>
+    <color name="gray">@android:color/darker_gray</color>
+    <color name="transparent">@android:color/transparent</color>
+    <color name="background_tab_pressed">#6633B5E5</color>
+    <!--
+    <color name="white">@android:color/white</color>
+    <color name="chat_user_reply_background_color">#c8f0ff</color>
+    <color name="chat_company_reply_background_color">#F5F5F5</color>
+    <color name="gray">@android:color/darker_gray</color>
+    <color name="transparent">@android:color/transparent</color>
+    <color name="orange">@android:color/holo_blue_light</color>//ESTA MIERDA VOY A CAMBIAR
+    <color name="background_tab_pressed">#6633B5E5</color>
+
+    -->
+
+    <color name="primary">@color/blue_grey_800</color>
+    <color name="primary_dark">@color/blue_grey_900</color>
+    <!--<color name="accent">@color/teal_800</color>-->
+    <!--<color name="accent">#f04155</color>-->
+    <color name="accent">@color/red_500</color>
+    <!--FF3501-->
+    <!--CB7300-->
+    <!--663A00-->
+
+
+    <color name="control_normal">@color/teal_800</color>
+    <color name="control_highlight">@color/teal_700</color>
+    <color name="control_activated">@color/teal_500</color>
+
+    <!--<color name="window_background">#FFF5F5F5</color>-->
+
+    <!--<color name="semi_subtle_soundcloud">#FFAA80</color>-->
+    <!--<color name="subtle_soundcloud">#FFEEE6</color>-->
+    <color name="debug_yellow">#ffff00</color>
+    <color name="debug_red">#ff0000</color>
+    <color name="debug_blue">#0000ff</color>
+
+    <color name="vimeo_blue">#00c8ff</color>
+
+    <color name="white_alpha">#8FFF</color>
+
+    <color name="transparent_grey_500_seventy">#B39e9e9e</color>
+
+    <color name="transparent_black_five">#0D000000</color>
+    <color name="transparent_black_ten">#1A000000</color>
+    <color name="transparent_black_twenty">#33000000</color>
+    <color name="transparent_black_forty">#66000000</color>
+    <color name="transparent_black_fifty">#80000000</color>
+    <color name="transparent_black_sixty">#99000000</color>
+    <color name="transparent_black_seventy">#B3000000</color>
+    <color name="transparent_black_eighty">#CC000000</color>
+    <color name="transparent_black_ninty">#E6000000</color>
+    <color name="transparent_black_ninty_five">#F2000000</color>
+
+    <color name="transparent_white_five">#0DFFFFFF</color>
+    <color name="transparent_white_ten">#1AFFFFFF</color>
+    <color name="transparent_white_twenty">#33FFFFFF</color>
+    <color name="transparent_white_forty">#66FFFFFF</color>
+    <color name="transparent_white_fifty">#80FFFFFF</color>
+    <color name="transparent_white_sixty">#99FFFFFF</color>
+    <color name="transparent_white_seventy">#B3FFFFFF</color>
+    <color name="transparent_white_eighty">#CCFFFFFF</color>
+    <color name="transparent_white_ninty">#E6FFFFFF</color>
+    <color name="transparent_white_ninty_five">#F2FFFFFF</color>
+
+
+    <color name="fifty_percent_transparency_grey_400">#80bdbdbd</color>
+    <color name="fifty_percent_transparency_teal_500">#80009688</color>
+
+    <!-- Light Theme -->
+    <color name="search_light_background">#ffffffff</color>
+    <color name="search_light_icon">#ff616161</color>
+    <color name="search_light_text">#de000000</color>
+    <color name="search_light_text_hint">#8a000000</color>
+    <color name="search_light_separator">#ffe0e0e0</color>
+
+    <!-- Dark Theme -->
+    <color name="search_dark_background">#ff303030</color>
+    <color name="search_dark_icon">#ffffffff</color>
+    <color name="search_dark_text">#ffffffff</color>
+    <color name="search_dark_text_hint">#b3ffffff</color>
+    <color name="search_dark_separator">#ff616161</color>
+
+    <!-- Others -->
+    <color name="search_shadow">#80000000</color>
+    <color name="search_card_view_dark_background">#FF202020</color>
+    <color name="search_card_view_light_background">#FFFAFAFA</color>
+</resources>
