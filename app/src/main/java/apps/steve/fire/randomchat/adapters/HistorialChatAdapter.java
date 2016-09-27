@@ -61,6 +61,7 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
 
 
     // Usually involves inflating a layout from XML and returning the holder
+    //
     @Override
     public ChatsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
@@ -84,10 +85,6 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
 
         holder.time.setText(Utils.calculateLastConnection(new Date(item.getLastMessage().getMessageTime()), new Date(), mContext));
 
-        //holder.title.setText(item.getEmisor().getEdad() + " " + item.getEmisor().getGenero());
-        //holder.message.setText(item.getLastMessage());
-        //holder.time.setText("AYER");
-        //textLanguage.setText(R.string.language_spanish);
 
         Emisor me = item.getEmisor();
         Emisor interlocutor = item.getReceptor();
@@ -97,10 +94,33 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
         }
 
         int idAvatar = R.drawable.boy_1;
+        String title = "";
+        String message = "";
+        String counterMessage = "";
+        int counterColor = ContextCompat.getColor(mContext, R.color.white);
+
 
 
         String interlocutorGenero = me.getLooking().getGenero();
 
+        //AVATAR, AND GENDER
+
+        switch (Constants.Genero.valueOf(interlocutorGenero)) {
+            case CHICA:
+                idAvatar = R.drawable.girl_2;
+                title = mContext.getString(R.string.boy);
+                break;
+            case CHICO:
+                idAvatar = R.drawable.boy_1;
+                title = mContext.getString(R.string.girl);
+                break;
+        }
+
+
+        message = item.getLastMessage().getMessageText();
+
+
+        /*
         if (interlocutor == null){
 
             holder.counter.setText("ESPERANDO...");
@@ -110,42 +130,9 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
         }else{
             interlocutorGenero = interlocutor.getGenero();
 
-            switch (Constants.Genero.valueOf(interlocutorGenero)) {
-                case CHICA:
-                    idAvatar = R.drawable.girl_2;
-                    break;
-                case CHICO:
-                    idAvatar = R.drawable.boy_1;
-                    break;
-            }
-        }
 
-
-        holder.counter.setText("ESPERANDO...");
-        holder.counter.setVisibility(View.VISIBLE);
-        holder.time.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
-
-
-
-
-        Glide.with(mContext)
-                .load(idAvatar)
-                .placeholder(idAvatar)
-                .into(holder.imageView);
-
-        holder.message.setText(item.getLastMessage().getMessageText());
-        holder.title.setText(interlocutorGenero);
-
-        /*
-        if (!me.getKeyDevice().equals(androidID)) {
-            holder.title.setText("!item.getMe().getKeyDevice().equals(androidID)");
         }*/
 
-        Log.d(TAG, "androidID: " + androidID);
-        Log.d(TAG, "item.getLastMessage().getAndroidID(): " + item.getLastMessage().getAndroidID());
-
-
-        Log.d(TAG, "item.getLastMessage().getAndroidID().equals(androidID): " + item.getLastMessage().getAndroidID().equals(androidID));
 
         if (item.getLastMessage().getAndroidID().equals(me.getKeyDevice())) {
 
@@ -159,7 +146,7 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
                     drawableID = R.drawable.ic_double_check;
                     break;
                 case Constants.SENT:
-                    drawableID = R.drawable.ic_double_check;
+                    drawableID = R.drawable.ic_check;
                     break;
             }
 
@@ -167,14 +154,47 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
 
             holder.message.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
 
-
             if (item.getNoReaded() > 0) {
+                counterMessage = ""+item.getNoReaded();
                 holder.counter.setBackgroundResource(R.drawable.badge_circle);
-                holder.counter.setText("" + item.getNoReaded());
-                holder.counter.setVisibility(View.VISIBLE);
                 holder.time.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
             }
         }
+
+
+        if (interlocutor == null){
+            counterMessage = mContext.getString(R.string.chat_state_waiting);
+            counterColor = ContextCompat.getColor(mContext, R.color.vimeo_blue);
+        }
+
+
+
+        Glide.with(mContext)
+                .load(idAvatar)
+                .placeholder(idAvatar)
+                .into(holder.imageView);
+
+        holder.title.setText(interlocutorGenero);
+
+        holder.message.setText(message);
+
+        holder.counter.setText(counterMessage);
+        holder.counter.setTextColor(counterColor);
+
+
+
+
+
+        /*
+        if (!me.getKeyDevice().equals(androidID)) {
+            holder.title.setText("!item.getMe().getKeyDevice().equals(androidID)");
+        }*/
+
+        Log.d(TAG, "androidID: " + androidID);
+        Log.d(TAG, "item.getLastMessage().getAndroidID(): " + item.getLastMessage().getAndroidID());
+
+
+        Log.d(TAG, "item.getLastMessage().getAndroidID().equals(androidID): " + item.getLastMessage().getAndroidID().equals(androidID));
 
 
         /*buttonLike.setLiked(item.isLike());

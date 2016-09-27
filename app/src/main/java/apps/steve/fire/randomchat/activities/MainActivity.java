@@ -8,6 +8,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -26,6 +27,7 @@ import com.wang.avi.AVLoadingIndicatorView;
 import java.util.Date;
 import java.util.List;
 
+import apps.steve.fire.randomchat.ChatActivity;
 import apps.steve.fire.randomchat.Constants;
 import apps.steve.fire.randomchat.R;
 import apps.steve.fire.randomchat.Utils;
@@ -35,6 +37,7 @@ import apps.steve.fire.randomchat.fragments.ChatsFragment;
 import apps.steve.fire.randomchat.fragments.SearchFragment;
 import apps.steve.fire.randomchat.fragments.TrendFragment;
 import apps.steve.fire.randomchat.interfaces.OnChatsListener;
+import apps.steve.fire.randomchat.interfaces.OnSearchListener;
 import apps.steve.fire.randomchat.model.Connection;
 import apps.steve.fire.randomchat.model.HistorialChat;
 import apps.steve.fire.randomchat.model.RandomChat;
@@ -45,7 +48,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.leolin.shortcutbadger.ShortcutBadger;
 
-public class MainActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, NavigationView.OnNavigationItemSelectedListener, OnChatsListener {
+public class MainActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, NavigationView.OnNavigationItemSelectedListener, OnChatsListener, OnSearchListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     @BindView(R.id.toolbar)
@@ -103,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     private void initViews() {
 
-        firebaseHelper = new FirebaseHelper();
+        firebaseHelper = new FirebaseHelper(getActivity());
 
         androidID = Utils.getAndroidID(this);
         firebaseHelper.initChats(androidID, this);
@@ -152,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
                 android_id = Utils.getAndroidID(this);
             }
             startService(new Intent(getActivity(), NotificationFireListener.class));
-            firebaseHelper.createUser(android_id, user, getActivity());
+            firebaseHelper.createUser(android_id, user);
         }
     }
 
@@ -225,8 +228,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         // Handle navigation view item clicks here.
         switch (item.getItemId()) {
             case R.id.nav_main:
-                stopAnim();
-                Snackbar.make(fab, "R.id.nav_main", Snackbar.LENGTH_LONG).show();
+                //Snackbar.make(fab, "R.id.nav_main", Snackbar.LENGTH_LONG).show();
                 break;
         }
         return true;
@@ -235,27 +237,31 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     @OnClick(R.id.fab)
     void onFabClick(){
         int currentItem = viewPager.getCurrentItem();
-        List<Fragment> fragments = getSupportFragmentManager().getFragments();
-        Log.d(TAG, "getSupportFragmentManager().getFragments().size(): "+ fragments.size());
-        /*for (int i=0; i< fragments.size(); i++){
 
+        SearchFragment searchFragment = getSearchFragment();
+        if (searchFragment != null) {
+            searchFragment.startChat();
         }
-        if ( currentItem > (fragments.size()-1)){
-            Snackbar.make(viewPager, "++currentItem > fragments.size()", Snackbar.LENGTH_LONG).show();
-            return;
-        }
-        */
+
+        firebaseHelper.startChat(this);
+
+        /*
         switch (currentItem){
             //SEARCH FRAGMENT
             case 0:
-                startAnim();
-                ((SearchFragment) fragments.get(0)).startChat();
                 break;
             case 1:
                 break;
             case 2:
                 break;
         }
+        */
+    }
+
+    private SearchFragment getSearchFragment(){
+        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+        Log.d(TAG, "getSupportFragmentManager().getFragments().size(): "+ fragments.size());
+        return (SearchFragment) fragments.get(0);
     }
 
     @Override
@@ -293,14 +299,48 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     void startAnim(){
+
+        viewPager.setAlpha((float)0.3);
+        fab.setEnabled(false);
         avi.setVisibility(View.VISIBLE);
         avi.show();
         // or avi.smoothToShow();
     }
 
     void stopAnim(){
+
+        viewPager.setAlpha((float)1);
+        fab.setEnabled(true);
         avi.setVisibility(View.GONE);
         avi.hide();
         // or avi.smoothToHide();
+    }
+
+    @Override
+    public void onChatLaunched(String key) {
+        SearchFragment searchFragment = getSearchFragment();
+        if (searchFragment != null) {
+            searchFragment.enabledInputs(true);
+        }
+        stopAnim();
+        launchChatActivity(key);
+    }
+
+    @Override
+    public void onFailed(String error) {
+        SearchFragment searchFragment = getSearchFragment();
+        if (searchFragment != null) {
+            searchFragment.enabledInputs(true);
+        }
+        Snackbar.make(toolbar, error, Snackbar.LENGTH_LONG).show();
+        stopAnim();
+    }
+
+    private void launchChatActivity(String key) {
+        // first parameter is the context, second is the class of the activity to launch
+        Intent i = new Intent(getActivity(), ChatActivity.class);
+        // put "extras" into the bundle for access in the second activity
+        i.putExtra("key_random", key);
+        startActivity(i);
     }
 }

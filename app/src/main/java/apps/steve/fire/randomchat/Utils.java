@@ -291,10 +291,10 @@ public class Utils {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         emisor.setEdad(preferences.getInt("emisorEdad",18));
         emisor.setGenero(preferences.getString("emisorGenero", "CHICO"));
-        emisor.setKeyDevice(preferences.getString("emisorKeyDevice", "no"));
+        emisor.setKeyDevice(preferences.getString("emisorKeyDevice", "emisorKeyDevice"));
         Looking looking = new Looking(
                 preferences.getInt("lookingEdadMin",18),
-                preferences.getInt("lookingGenero",48),
+                preferences.getInt("lookingEdadMax",48),
                 preferences.getString("lookingGenero","CHICO")
         );
         emisor.setLooking(looking);

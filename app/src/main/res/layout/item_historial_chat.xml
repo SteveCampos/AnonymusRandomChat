@@ -81,12 +81,11 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_alignLeft="@+id/text_time"
-            android:layout_below="@+id/text_time"
             android:text=""
             android:gravity="center"
             android:textColor="@color/white"
-            android:visibility="invisible"
-            />
+            android:visibility="visible"
+            android:layout_alignBottom="@+id/text_last_message" />
 
         <!--
         <android.support.v7.widget.AppCompatButton

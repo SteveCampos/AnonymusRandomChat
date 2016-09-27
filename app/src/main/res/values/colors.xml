@@ -18,6 +18,8 @@
     <!--<color name="accent">@color/teal_800</color>-->
     <!--<color name="accent">#f04155</color>-->
     <color name="accent">@color/red_500</color>
+    <color name="vimeo_blue_transparent">#E600c8ff</color>
+
     <!--FF3501-->
     <!--CB7300-->
     <!--663A00-->

@@ -7,8 +7,6 @@ import apps.steve.fire.randomchat.model.Emisor;
  */
 
 public interface OnSearchListener {
-    //void onUserCreated(boolean success, String error);
-    void onChatPared(String key, String startType, Emisor me, Emisor emisor);
-    void onChatCreated(String key, String startType, Emisor me, Emisor receptor);
+    void onChatLaunched(String key);
     void onFailed(String error);
 }

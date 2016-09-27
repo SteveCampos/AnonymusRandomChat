@@ -1,6 +1,7 @@
 package apps.steve.fire.randomchat.fragments;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -34,6 +35,7 @@ import apps.steve.fire.randomchat.Constants;
 import apps.steve.fire.randomchat.Historial;
 import apps.steve.fire.randomchat.R;
 import apps.steve.fire.randomchat.Utils;
+import apps.steve.fire.randomchat.activities.MainActivity;
 import apps.steve.fire.randomchat.firebase.FirebaseHelper;
 import apps.steve.fire.randomchat.interfaces.OnSearchListener;
 import apps.steve.fire.randomchat.model.Chater;
@@ -54,10 +56,12 @@ import static apps.steve.fire.randomchat.Utils.isBetween;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChangeListener, CircledPicker.OnSliderMoveListener, OnSearchListener {
+public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChangeListener, CircledPicker.OnSliderMoveListener{
 
 
     //Field and method binding for Android view
+
+    private OnSearchListener listener;
 
     //Emisor
     @BindView(R.id.imageview_avatar)
@@ -151,7 +155,7 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
 
     private Emisor emisorPared;
     private Emisor receptorPared;
-    FirebaseHelper firebaseHelper;
+    //FirebaseHelper firebaseHelper;
 
     @BindView(R.id.layout)
     LinearLayoutCompat linearLayoutCompat;
@@ -212,42 +216,17 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
 
     public void startChat() {
         Snackbar.make(linearLayoutCompat, R.string.app_name, Snackbar.LENGTH_LONG).show();
+        enabledInputs(false);
         Utils.saveEmisor(getActivity(), new Emisor(android_id, emisorEdad, genero.name(), new Looking(receptorEdadMin, receptorEdadMax, generoReceptor.name())));
-
-        firebaseHelper.startChat(new Emisor(
-                        android_id,
-                        emisorEdad,
-                        genero.name(),
-                        new Looking(
-                                receptorEdadMin,
-                                receptorEdadMax,
-                                generoReceptor.name()
-                        )
-                        )
-                , this);
+        //firebaseHelper.startChat(this);
     }
 
-    private void launchChatActivity(String key, String start_type, Emisor me, Emisor emisor) {
-        Toast.makeText(getActivity(), "launchChatActivity", Toast.LENGTH_SHORT).show();
-
-        // first parameter is the context, second is the class of the activity to launch
-        Intent i = new Intent(getActivity(), ChatActivity.class);
-        // put "extras" into the bundle for access in the second activity
-        i.putExtra("key_random", key);
-        /*i.putExtra("start_type", start_type);
-        i.putExtra("android_id", me.getKeyDevice());
-        i.putExtra("android_id_receptor", emisor.getKeyDevice());
-        i.putExtra("me", me);
-        i.putExtra("emisor", emisor);*/
-        // brings up the second activity
-        startActivity(i);
-    }
 
 
     private void init() {
 
         Log.d(TAG, "init()");
-        firebaseHelper = new FirebaseHelper();
+        //firebaseHelper = new FirebaseHelper(getActivity());
 
 
         // FIREBASE INIT
@@ -443,7 +422,7 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
 
     }
 
-    private void enabledInputs(boolean enabled) {
+    public void enabledInputs(boolean enabled) {
         //EMISOR
         spinnerGenero.setEnabled(enabled);
         circledPickerEdad.setEnabled(enabled);
@@ -456,20 +435,43 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
         rangeBarReceptor.setActivated(enabled);
     }
 
-    @Override
-    public void onChatPared(String key, String startType, Emisor me, Emisor emisor) {
-        firebaseHelper.removeListenerRead();
-        launchChatActivity(key, startType, me, emisor);    }
 
+
+
+    /*
     @Override
-    public void onChatCreated(String key, String startType, Emisor me, Emisor receptor) {
+    public void onChatLaunched(String key) {
         firebaseHelper.removeListenerRead();
-        launchChatActivity(key, startType, receptor, me);
+        enabledInputs(true);
+        listener.onChatLaunched(key);
     }
 
     @Override
     public void onFailed(String error) {
         firebaseHelper.removeListenerRead();
-        Snackbar.make(linearLayoutCompat, error, Snackbar.LENGTH_LONG).show();
+        enabledInputs(true);
+        listener.onFailed(error);
+    }*/
+
+    // This event fires 1st, before creation of fragment or any views
+    // The onAttach method is called when the Fragment instance is associated with an Activity.
+    // This does not mean the Activity is fully initialized.
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnSearchListener) {
+            listener = (OnSearchListener) context;
+        } else {
+            throw new ClassCastException(context.toString()
+                    + " must implement OnSearchListener");
+        }
+    }
+
+    // This method is called when the fragment is no longer connected to the Activity
+    // Any references saved in onAttach should be nulled out here to prevent memory leaks.
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        this.listener = null;
     }
 }

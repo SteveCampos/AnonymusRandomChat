@@ -48,8 +48,8 @@
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:indicatorName="PacmanIndicator"
-            style="@style/AVLoadingIndicatorView"
+            app:indicatorName="LineScalePulseOutIndicator"
+            style="@style/AVLoadingIndicatorView.Large"
             android:visibility="gone"
             app:indicatorColor="@color/accent"
             />

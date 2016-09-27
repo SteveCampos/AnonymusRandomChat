@@ -47,7 +47,7 @@ public class FirebaseRoom {
     private DatabaseReference messagesReference;
     private DatabaseReference userReference;
 
-    private String androidIDReceptor;
+
     private DatabaseReference receptorReference;
 
     private DatabaseReference roomReceptorReference;
@@ -169,31 +169,38 @@ public class FirebaseRoom {
         String keyMessage = messagesReference.push().getKey();
         String messagePath = "/" + Constants.CHILD_RANDOMS + "/" + key + "/" + Constants.CHILD_MESSAGES + "/" + keyMessage;
 
-        String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + androidIDReceptor + "/" + androidID;
 
         Map<String, Object> messagePost = new HashMap<>();
 
         Map<String, Object> messageValues = message.toMap();
 
         messagePost.put(messagePath, messageValues);
-        if (me != null && him != null) {
+
+
+
+        if (me != null) {
 
             String to = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
-            String toReceptor = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
-
             messagePost.put(to + "/lastMessage", messageValues);
-            messagePost.put(toReceptor + "/lastMessage", messageValues);
 
-            List<String> messageNoReaded = calculateMessagesNoReaded();
 
-            //messagePost.put(to + "/noReaded", messageNoReaded.size());
-            messagePost.put(toReceptor + "/noReaded", messageNoReaded.size());
+            if (him != null){
 
-            if (himConnection != null) {
-                if (! himConnection.getState().equals(Constants.STATE_ONLINE)) {
-                    String messages = getStringofArray(messageNoReaded);
-                    messagePost.put(notificationPath, new Notification(messages, androidID, key, androidID, Constants.SENT).toMap());
+                String toReceptor = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
+                String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + him.getKeyDevice() + "/" + androidID;
 
+                messagePost.put(toReceptor + "/lastMessage", messageValues);
+                List<String> messageNoReaded = calculateMessagesNoReaded();
+
+                //messagePost.put(to + "/noReaded", messageNoReaded.size());
+                messagePost.put(toReceptor + "/noReaded", messageNoReaded.size());
+
+                if (himConnection != null) {
+                    if (! himConnection.getState().equals(Constants.STATE_ONLINE)) {
+                        String messages = getStringofArray(messageNoReaded);
+                        messagePost.put(notificationPath, new Notification(messages, androidID, key, androidID, Constants.SENT).toMap());
+
+                    }
                 }
             }
 

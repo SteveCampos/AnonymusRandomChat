@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import apps.steve.fire.randomchat.Constants;
+import apps.steve.fire.randomchat.Utils;
 import apps.steve.fire.randomchat.interfaces.OnChatsListener;
 import apps.steve.fire.randomchat.interfaces.OnSearchListener;
 import apps.steve.fire.randomchat.model.ChatMessage;
@@ -52,13 +53,16 @@ public class FirebaseHelper {
     ValueEventListener nodeRandoms;
     ValueEventListener chatsListener;
 
-    public FirebaseHelper() {
+    private Context context;
+
+    public FirebaseHelper(Context context) {
         this.firebaseDatabase = FirebaseDatabase.getInstance();
         this.refRandoms = firebaseDatabase.getReference(Constants.CHILD_RANDOMS);
         this.refUsers = firebaseDatabase.getReference(Constants.CHILD_USERS);
+        this.context = context;
     }
 
-    public void createUser(String id, User user, final Context context) {
+    public void createUser(String id, User user) {
 
         Log.d(TAG, "createUser ...");
         refUsers.child(id).setValue(user, new DatabaseReference.CompletionListener() {
@@ -81,8 +85,9 @@ public class FirebaseHelper {
 
     //SEARCH CHAT
 
-    public void startChat(Emisor me, OnSearchListener listener) {
+    public void startChat(OnSearchListener listener) {
         this.listener = listener;
+        Emisor me = Utils.getEmisor(context);
         readNodeRandoms(me);
     }
 
@@ -268,8 +273,7 @@ public class FirebaseHelper {
                     listener.onFailed(databaseError.getMessage());
                 } else {
                     Log.d(TAG, "createNewChat SUCCESS: " + true);
-                    //launchChatActivity(finalKeyChat, Constants._HERE);
-                    listener.onChatCreated(finalKeyChat, Constants._HERE, me, new Emisor());
+                    listener.onChatLaunched(finalKeyChat);
                 }
             }
         });
@@ -353,11 +357,9 @@ public class FirebaseHelper {
                     listener.onFailed(databaseError.getMessage());
                     //readNodeRandoms();
                 } else {
-                    //SE EMPAREJÓ CARAJO
-                    //INICIAR LA OTRA ACTIVIDAD CONCHESUVIDA.
-                    //launchChatActivity(key, Constants._PARED);
+
                     //ON SUCCESS.
-                    listener.onChatPared(keyChat, Constants._PARED, me, emisor);
+                    listener.onChatLaunched(keyChat);
 
                 }
             }
