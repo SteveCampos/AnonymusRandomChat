@@ -229,18 +229,18 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
 
     private void launchChatActivity(String key, String start_type, Emisor me, Emisor emisor) {
         Toast.makeText(getActivity(), "launchChatActivity", Toast.LENGTH_SHORT).show();
-        /*
+
         // first parameter is the context, second is the class of the activity to launch
         Intent i = new Intent(getActivity(), ChatActivity.class);
         // put "extras" into the bundle for access in the second activity
         i.putExtra("key_random", key);
-        i.putExtra("start_type", start_type);
+        /*i.putExtra("start_type", start_type);
         i.putExtra("android_id", me.getKeyDevice());
         i.putExtra("android_id_receptor", emisor.getKeyDevice());
         i.putExtra("me", me);
-        i.putExtra("emisor", emisor);
+        i.putExtra("emisor", emisor);*/
         // brings up the second activity
-        startActivity(i);*/
+        startActivity(i);
     }
 
 

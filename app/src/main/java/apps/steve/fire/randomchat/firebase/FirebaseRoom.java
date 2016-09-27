@@ -8,6 +8,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import apps.steve.fire.randomchat.model.Chater;
 import apps.steve.fire.randomchat.model.Connection;
 import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.model.Notification;
+import apps.steve.fire.randomchat.model.RandomChat;
 
 /**
  * Created by Steve on 24/08/2016.
@@ -31,26 +33,48 @@ import apps.steve.fire.randomchat.model.Notification;
 public class FirebaseRoom {
 
     private static final String TAG = FirebaseRoom.class.getSimpleName();
+
     private String key;
+
     private OnRoomListener listener;
+
     private FirebaseDatabase firebaseDatabase;
+
+    //ROOM REFERENCE
     private DatabaseReference roomReference;
+
+
     private DatabaseReference messagesReference;
     private DatabaseReference userReference;
-    private DatabaseReference chatStateReference;
 
     private String androidIDReceptor;
     private DatabaseReference receptorReference;
 
-    private DatabaseReference randomReceptorReference;
-    private DatabaseReference randomEmisorReference;
+    private DatabaseReference roomReceptorReference;
+    private DatabaseReference roomEmisorReference;
+    private DatabaseReference stateReference;
+    private DatabaseReference actionReference;
 
     private String androidID;
 
     ValueEventListener messagesListener;
     ValueEventListener chatStateListener;
-    ValueEventListener randomReceptorListener;
-    ValueEventListener randomEmisorListener;
+    //ValueEventListener randomReceptorListener;
+    //ValueEventListener randomEmisorListener;
+
+    ValueEventListener roomChatterListener;
+    ValueEventListener roomReceptorListener;
+    ValueEventListener stateListener;
+    ValueEventListener actionListener;
+
+    private Emisor me;
+    private Emisor him;
+    private String action;
+    private String state;
+
+    List<ChatMessage> messages = new ArrayList<ChatMessage>();
+
+    private Connection himConnection;
 
     public FirebaseRoom(String key, String androidID, OnRoomListener listener) {
         this.key = key;
@@ -58,24 +82,92 @@ public class FirebaseRoom {
         this.listener = listener;
         this.firebaseDatabase = FirebaseDatabase.getInstance();
         this.roomReference = firebaseDatabase.getReference(Constants.CHILD_RANDOMS).child(key);
+
         this.messagesReference = roomReference.child(Constants.CHILD_MESSAGES);
         this.userReference = firebaseDatabase.getReference(Constants.CHILD_USERS);
-        this.chatStateReference = roomReference.child(Constants.CHILD_STATE);
-        this.randomReceptorReference = roomReference.child("receptor");
-        this.randomEmisorReference = roomReference.child("emisor");
-        listenMessages();
-        listenChatState();
-        listenRandomReceptor();
+
+        this.roomReceptorReference = roomReference.child("receptor");
+        this.roomEmisorReference = roomReference.child("emisor");
+        this.stateReference = roomReference.child("estado");
+        this.actionReference = roomReference.child("action");
+        //listenRandomReceptor();
+        listenRoom();
     }
 
-    public void sendMessage(String androidID, String androidIDReceptor, final ChatMessage message, boolean isReceptorOnline, List<String> messageNoReaded) {
+    private void listenRoom() {
+        listenMessages();
+        roomChatterListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "roomChatterListener dataSnapshot: " + dataSnapshot);
+                if (dataSnapshot != null) {
+                    Emisor temp = dataSnapshot.getValue(Emisor.class);
 
-        this.androidID = androidID;
+                    if (temp == null) {
+                        return;
+                    }
+
+                    if (temp.getKeyDevice().equals(androidID)) {
+                        me = temp;
+                        listener.onMeReaded(me);
+                    } else {
+                        him = temp;
+                        listenHimConnection();
+                        listener.onHimReaded(him);
+
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "roomChatterListener databaseError: " + databaseError);
+            }
+        };
+
+        stateListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "stateListener dataSnapshot: " + dataSnapshot);
+                if (dataSnapshot != null) {
+                    state = dataSnapshot.getValue(String.class);
+                    listener.onRoomStateChanged(state);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "stateListener databaseError: " + databaseError);
+            }
+        };
+        actionListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "actionListener dataSnapshot: " + dataSnapshot);
+                if (dataSnapshot != null) {
+                    action = dataSnapshot.getValue(String.class);
+                    listener.onRoomActionChanged(action);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "stateListener databaseError: " + databaseError);
+            }
+        };
+
+        roomEmisorReference.addListenerForSingleValueEvent(roomChatterListener);
+        roomReceptorReference.addListenerForSingleValueEvent(roomChatterListener);
+        stateReference.addValueEventListener(stateListener);
+        actionReference.addValueEventListener(actionListener);
+    }
+
+
+    public void sendMessage(final ChatMessage message) {
 
         String keyMessage = messagesReference.push().getKey();
         String messagePath = "/" + Constants.CHILD_RANDOMS + "/" + key + "/" + Constants.CHILD_MESSAGES + "/" + keyMessage;
-        String to = "/" + Constants.CHILD_USERS + "/" + androidID + "/" + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
-        String toReceptor = "/" + Constants.CHILD_USERS + "/" + androidIDReceptor + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
 
         String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + androidIDReceptor + "/" + androidID;
 
@@ -84,18 +176,27 @@ public class FirebaseRoom {
         Map<String, Object> messageValues = message.toMap();
 
         messagePost.put(messagePath, messageValues);
-        if (!TextUtils.isEmpty(androidID) && !TextUtils.isEmpty(androidIDReceptor)) {
+        if (me != null && him != null) {
+
+            String to = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
+            String toReceptor = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
+
             messagePost.put(to + "/lastMessage", messageValues);
             messagePost.put(toReceptor + "/lastMessage", messageValues);
+
+            List<String> messageNoReaded = calculateMessagesNoReaded();
 
             //messagePost.put(to + "/noReaded", messageNoReaded.size());
             messagePost.put(toReceptor + "/noReaded", messageNoReaded.size());
 
-            if (!isReceptorOnline) {
-                String messages = getStringofArray(messageNoReaded);
-                messagePost.put(notificationPath, new Notification(messages, androidID, key, androidID, Constants.SENT).toMap());
+            if (himConnection != null) {
+                if (! himConnection.getState().equals(Constants.STATE_ONLINE)) {
+                    String messages = getStringofArray(messageNoReaded);
+                    messagePost.put(notificationPath, new Notification(messages, androidID, key, androidID, Constants.SENT).toMap());
 
+                }
             }
+
         }
 
 
@@ -105,18 +206,21 @@ public class FirebaseRoom {
                 listener.onMessagedSended(databaseError == null, message, databaseError == null ? null : databaseError.getMessage());
             }
         });
-
-        /*
-        messagesReference.push().setValue(message, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                listener.onMessagedSended(databaseError == null, message ,databaseError == null ? null : databaseError.getMessage());
-            }
-        });*/
     }
 
-    public void changeState(String state) {
-        chatStateReference.setValue(state);
+    private List<String> calculateMessagesNoReaded() {
+        List<String> messageNoReaded = new ArrayList<>();
+        for (int i = 0; i < messages.size(); i++) {
+            if (messages.get(i).getMessageStatus() != Constants.READED && messages.get(i).getAndroidID().equals(androidID)) { //&& messages.get(i).getAndroidID().equals(androidID)
+                messageNoReaded.add(messages.get(i).getMessageText());
+            }
+        }
+        Log.d(TAG, "messageNoReaded.size(): " + messageNoReaded.size());
+        return messageNoReaded;
+    }
+
+    public void changeAction(String action) {
+        actionReference.setValue(action);
     }
 
     private String getStringofArray(List<String> list) {
@@ -130,6 +234,7 @@ public class FirebaseRoom {
         return messages;
     }
 
+    /*
     public void createHistoryChat(String android_id, Chater me, Chater emisor) {
 
 
@@ -196,41 +301,32 @@ public class FirebaseRoom {
         firebaseDatabase.getReference(Constants.CHILD_USERS).updateChildren(histo_user_me, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                listener.onChatHistoryCreated(databaseError == null, databaseError != null ? databaseError.getMessage() : null);
+                //listener.onChatHistoryCreated(databaseError == null, databaseError != null ? databaseError.getMessage() : null);
             }
         });
-    }
+    }*/
 
-    public void listenMessages() {
-
+    private void listenMessages() {
         messagesListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
-                List<ChatMessage> messages = new ArrayList<ChatMessage>();
                 Log.d(TAG, "There are " + dataSnapshot.getChildrenCount() + " messages");
-                //chatMessages.clear();
+                messages.clear();
+
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     ChatMessage message = postSnapshot.getValue(ChatMessage.class);
                     message.setKeyMessage(postSnapshot.getKey());
-                    Log.d(Constants.TAG, message.getMessageText() + " - " + message.getAndroidID());
+                    Log.d(Constants.TAG, "MESSAGE: " + message.getMessageText() + " - " + message.getAndroidID());
                     //SI LO ESTÁ LEYENDO DEL SERVER, ESO QUIERO DECIR, QUE YA ESTÁ EN EL SERVER, SIEMPRE.
                     //message.setMessageStatus(Constants.DELIVERED);
                     messages.add(message);
                 }
                 listener.onReadMessages(messages);
-
-
-                //if(chatAdapter!=null)
-                //    chatAdapter.notifyDataSetChanged();
-
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.d(TAG, "listenMessages databaseError: " + databaseError.getMessage());
-                //Toast.makeText(getActivity(), "THE READ FAILED : " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
-
             }
         };
         messagesReference.limitToLast(10).addValueEventListener(messagesListener);
@@ -240,30 +336,19 @@ public class FirebaseRoom {
         messagesReference.removeEventListener(messagesListener);
     }
 
-    private void listenConnection() {
-        /*
-        userReference.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                HistorialChat chat = dataSnapshot.getValue(HistorialChat.class);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });*/
-
-    }
 
     public void setReaded(List<ChatMessage> messages) {
+        if ( me == null || him == null){
+            return;
+        }
+
         messages = getMessageNoReaded(messages);
         if (messages.size() > 0) {
 
             String messagePath = "/" + Constants.CHILD_RANDOMS + "/" + key + "/" + Constants.CHILD_MESSAGES;//UPDATE MESSAGES STATUS
-            String to = "/" + Constants.CHILD_USERS + "/" + androidID + "/" + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key; //UPDATE COUNT
-            String toReceptor = "/" + Constants.CHILD_USERS + "/" + androidIDReceptor + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
-            String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + androidID + "/" + androidIDReceptor;
+            String to = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key; //UPDATE COUNT
+            String toReceptor = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
+            String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + me.getKeyDevice() + "/" + him.getKeyDevice();
 
             Map<String, Object> messageReaded = new HashMap<>();
             for (ChatMessage message : messages) {
@@ -288,26 +373,28 @@ public class FirebaseRoom {
         List<ChatMessage> messageNoReaded = new ArrayList<>();
         for (int i = 0; i < messages.size(); i++) {
             ChatMessage message = messages.get(i);
-            if (message.getMessageStatus() != Constants.READED && message.getAndroidID().equals(androidIDReceptor)) {
+            if (message.getMessageStatus() != Constants.READED && message.getAndroidID().equals(him.getKeyDevice())) {
                 message.setMessageStatus(Constants.READED);
                 messageNoReaded.add(message);
             }
         }
-
         return messageNoReaded;
     }
 
-    public void listenReceptorConnection(String androidIDReceptor) {
-        this.androidIDReceptor = androidIDReceptor;
-        this.receptorReference = firebaseDatabase.getReference(Constants.CHILD_USERS).child(androidIDReceptor).child(Constants.CHILD_CONNECTION);
+    private void listenHimConnection() {
+        Log.d(TAG, "listenHimConnection");
+        if (him == null) {
+            return;
+        }
+        this.receptorReference = firebaseDatabase.getReference(Constants.CHILD_USERS).child(him.getKeyDevice()).child(Constants.CHILD_CONNECTION);
         receptorReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 if (dataSnapshot != null) {
                     Log.d(TAG, "listenReceptorConnection dataSnapshot: " + dataSnapshot);
-                    Connection connection = dataSnapshot.getValue(Connection.class);
-                    listener.onReceptorConnectionChanged(connection.getState(), connection.getLastConnection());
+                    himConnection = dataSnapshot.getValue(Connection.class);
+                    listener.onReceptorConnectionChanged(himConnection.getState(), himConnection.getLastConnection());
                 }
             }
 
@@ -318,26 +405,9 @@ public class FirebaseRoom {
         });
     }
 
-    private void listenChatState() {
-        chatStateListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot != null) {
-                    Log.d(TAG, "listenChatState dataSnapshot: " + dataSnapshot);
-                    String estado = dataSnapshot.getValue(String.class);
-                    listener.onChatStateChanged(estado);
-                }
 
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "listenChatState databaseError: " + databaseError.getMessage());
-            }
-        };
-        chatStateReference.addValueEventListener(chatStateListener);
-    }
-
+    /*
     private void listenRandomReceptor(){
         randomReceptorListener = new ValueEventListener() {
             @Override
@@ -380,6 +450,6 @@ public class FirebaseRoom {
             }
         };
         randomEmisorReference.addValueEventListener(randomEmisorListener);
-    }
+    }*/
 
 }

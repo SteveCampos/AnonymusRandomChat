@@ -25,6 +25,7 @@ import java.util.Map;
 
 import apps.steve.fire.randomchat.adapters.HistorialChatAdapter;
 import apps.steve.fire.randomchat.model.HistorialChat;
+import apps.steve.fire.randomchat.model.RandomChat;
 
 public class Historial extends AppCompatActivity implements HistorialChatAdapter.OnStartChatListener {
 
@@ -85,15 +86,15 @@ public class Historial extends AppCompatActivity implements HistorialChatAdapter
     private void setRecyclerView(List<HistorialChat> listHistorialChats){
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rvChats);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
+/*
         HistorialChatAdapter historialChatAdapter = new HistorialChatAdapter(
                 listHistorialChats, getApplicationContext(), android_id,
-                this);
-        recyclerView.setAdapter(historialChatAdapter);
+                this);*/
+        //recyclerView.setAdapter(historialChatAdapter);
     }
 
     @Override
-    public void onStartChat(HistorialChat item, View view, boolean liked) {
+    public void onStartChat(RandomChat item, View view, boolean liked) {
 
 
         switch (view.getId()){
@@ -163,11 +164,11 @@ public class Historial extends AppCompatActivity implements HistorialChatAdapter
         return this;
     }
 
-    private void launchChatActivity(HistorialChat historialChat, String start_type) {
+    private void launchChatActivity(RandomChat item, String start_type) {
         // first parameter is the context, second is the class of the activity to launch
         Intent i = new Intent(getActivity(), ChatActivity.class);
         // put "extras" into the bundle for access in the second activity
-        i.putExtra("key_random", historialChat.getKeyChat());
+        i.putExtra("key_random", item.getKeyChat());
         i.putExtra("start_type", start_type);
         // brings up the second activity
         startActivity(i);

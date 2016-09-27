@@ -12,10 +12,12 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import apps.steve.fire.randomchat.Constants;
 import apps.steve.fire.randomchat.interfaces.OnChatsListener;
 import apps.steve.fire.randomchat.model.HistorialChat;
+import apps.steve.fire.randomchat.model.RandomChat;
 
 /**
  * Created by Steve on 29/08/2016.
@@ -28,6 +30,7 @@ public class FirebaseChats {
     private OnChatsListener listener;
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference chatsReference;
+
 
     public FirebaseChats(String androidID, OnChatsListener listener) {
         this.androidID = androidID;
@@ -46,14 +49,14 @@ public class FirebaseChats {
                 // whenever data at this location is updated.
                 Log.d(TAG, "DataSnapshot COUNT: "+ dataSnapshot.getChildrenCount());
 
-                List<HistorialChat> list = new ArrayList<HistorialChat>();
+                List<RandomChat> list = new ArrayList<>();
                 if (dataSnapshot.getChildrenCount()>0){
                     for (DataSnapshot postSnapshot: dataSnapshot.getChildren()){
                         Log.d(TAG, "CHILDREN KEY: "+ postSnapshot.getKey());
 
-                        HistorialChat historialChat = postSnapshot.getValue(HistorialChat.class);
-                        Log.d(TAG, historialChat.getKeyChat());
-                        list.add(historialChat);
+                        RandomChat chat = postSnapshot.getValue(RandomChat.class);
+                        Log.d(TAG, chat.getKeyChat());
+                        list.add(chat);
                     }
                 }
                 listener.onChatChangedListener(true, list);

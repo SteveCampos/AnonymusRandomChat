@@ -4,16 +4,21 @@ import java.util.List;
 
 import apps.steve.fire.randomchat.model.ChatMessage;
 import apps.steve.fire.randomchat.model.Chater;
+import apps.steve.fire.randomchat.model.Emisor;
+import apps.steve.fire.randomchat.model.RandomChat;
 
 /**
  * Created by Steve on 24/08/2016.
  */
 
 public interface OnRoomListener {
-    void onChatHistoryCreated(boolean success, String error);
     void onMessagedSended(boolean success, ChatMessage message, String error);
     void onReadMessages(List<ChatMessage> messages);
-    void onReceptorConnectionChanged(String state, long lastConnection);
-    void onChatStateChanged(String state);
 
+    void onMeReaded(Emisor me);
+    void onHimReaded(Emisor him);
+    void onRoomStateChanged(String state);
+    void onRoomActionChanged(String action);
+
+    void onReceptorConnectionChanged(String state, long lastConnection);
 }

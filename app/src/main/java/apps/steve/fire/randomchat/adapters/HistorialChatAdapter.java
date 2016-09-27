@@ -2,10 +2,12 @@ package apps.steve.fire.randomchat.adapters;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,27 +27,32 @@ import apps.steve.fire.randomchat.Historial;
 import apps.steve.fire.randomchat.R;
 import apps.steve.fire.randomchat.Utils;
 import apps.steve.fire.randomchat.holders.ChatsHolder;
+import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.model.HistorialChat;
+import apps.steve.fire.randomchat.model.RandomChat;
+
+import static apps.steve.fire.randomchat.Constants.Genero.CHICO;
 
 /**
  * Created by Steve on 14/07/2016.
  */
 
 public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
+    //https://cinegaygratis.blogspot.pe/2015/07/un-chant-d-amour.html
 
     private static final String TAG = HistorialChatAdapter.class.getSimpleName();
 
     public interface OnStartChatListener {
-        void onStartChat(HistorialChat item, View view, boolean liked);
+        void onStartChat(RandomChat item, View view, boolean liked);
     }
 
     private final OnStartChatListener listener;
     // Store a member variable for the contacts
-    private List<HistorialChat> mHistorial;
+    private List<RandomChat> mHistorial;
     private Context mContext;
     String androidID;
 
-    public HistorialChatAdapter(List<HistorialChat> mHistorial, Context mContext, String androidID, OnStartChatListener listener) {
+    public HistorialChatAdapter(List<RandomChat> mHistorial, Context mContext, String androidID, OnStartChatListener listener) {
         this.mHistorial = mHistorial;
         this.mContext = mContext;
         this.listener = listener;
@@ -63,7 +70,7 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
         return new ChatsHolder(contactView);
     }
 
-    public void setData(List<HistorialChat> mHistorial) {
+    public void setData(List<RandomChat> mHistorial) {
         this.mHistorial = mHistorial;
         notifyDataSetChanged();
     }
@@ -73,7 +80,8 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
     @Override
     public void onBindViewHolder(ChatsHolder holder, int position) {
 
-        final HistorialChat item = mHistorial.get(position);
+        final RandomChat item = mHistorial.get(position);
+
         holder.time.setText(Utils.calculateLastConnection(new Date(item.getLastMessage().getMessageTime()), new Date(), mContext));
 
         //holder.title.setText(item.getEmisor().getEdad() + " " + item.getEmisor().getGenero());
@@ -81,16 +89,43 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
         //holder.time.setText("AYER");
         //textLanguage.setText(R.string.language_spanish);
 
+        Emisor me = item.getEmisor();
+        Emisor interlocutor = item.getReceptor();
+        if (!item.getEmisor().getKeyDevice().equals(androidID)){
+            me = item.getReceptor();
+            interlocutor = item.getEmisor();
+        }
 
         int idAvatar = R.drawable.boy_1;
-        switch (Constants.Genero.valueOf(item.getEmisor().getGenero())) {
-            case CHICA:
-                idAvatar = R.drawable.girl_2;
-                break;
-            case CHICO:
-                idAvatar = R.drawable.boy_1;
-                break;
+
+
+        String interlocutorGenero = me.getLooking().getGenero();
+
+        if (interlocutor == null){
+
+            holder.counter.setText("ESPERANDO...");
+            holder.counter.setVisibility(View.VISIBLE);
+            holder.counter.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
+            holder.time.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
+        }else{
+            interlocutorGenero = interlocutor.getGenero();
+
+            switch (Constants.Genero.valueOf(interlocutorGenero)) {
+                case CHICA:
+                    idAvatar = R.drawable.girl_2;
+                    break;
+                case CHICO:
+                    idAvatar = R.drawable.boy_1;
+                    break;
+            }
         }
+
+
+        holder.counter.setText("ESPERANDO...");
+        holder.counter.setVisibility(View.VISIBLE);
+        holder.time.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
+
+
 
 
         Glide.with(mContext)
@@ -99,11 +134,12 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
                 .into(holder.imageView);
 
         holder.message.setText(item.getLastMessage().getMessageText());
-        holder.title.setText(item.getEmisor().getGenero() + " " + item.getEmisor().getEdad());
+        holder.title.setText(interlocutorGenero);
 
-        if (!item.getMe().getKeyDevice().equals(androidID)) {
+        /*
+        if (!me.getKeyDevice().equals(androidID)) {
             holder.title.setText("!item.getMe().getKeyDevice().equals(androidID)");
-        }
+        }*/
 
         Log.d(TAG, "androidID: " + androidID);
         Log.d(TAG, "item.getLastMessage().getAndroidID(): " + item.getLastMessage().getAndroidID());
@@ -111,7 +147,7 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
 
         Log.d(TAG, "item.getLastMessage().getAndroidID().equals(androidID): " + item.getLastMessage().getAndroidID().equals(androidID));
 
-        if (item.getLastMessage().getAndroidID().equals(androidID)) {
+        if (item.getLastMessage().getAndroidID().equals(me.getKeyDevice())) {
 
             int drawableID =  R.drawable.ic_double_check;
 
@@ -131,12 +167,13 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
 
             holder.message.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
 
-        }
 
-        if (item.getNoReaded() > 0) {
-            holder.counter.setText("" + item.getNoReaded());
-            holder.counter.setVisibility(View.VISIBLE);
-            holder.time.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
+            if (item.getNoReaded() > 0) {
+                holder.counter.setBackgroundResource(R.drawable.badge_circle);
+                holder.counter.setText("" + item.getNoReaded());
+                holder.counter.setVisibility(View.VISIBLE);
+                holder.time.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
+            }
         }
 
 

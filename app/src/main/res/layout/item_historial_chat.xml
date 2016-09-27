@@ -85,7 +85,6 @@
             android:text=""
             android:gravity="center"
             android:textColor="@color/white"
-            android:background="@drawable/badge_circle"
             android:visibility="invisible"
             />
 

@@ -18,7 +18,10 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
+
+import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.Date;
 import java.util.List;
@@ -34,6 +37,7 @@ import apps.steve.fire.randomchat.fragments.TrendFragment;
 import apps.steve.fire.randomchat.interfaces.OnChatsListener;
 import apps.steve.fire.randomchat.model.Connection;
 import apps.steve.fire.randomchat.model.HistorialChat;
+import apps.steve.fire.randomchat.model.RandomChat;
 import apps.steve.fire.randomchat.model.User;
 import apps.steve.fire.randomchat.notifications.NotificationFireListener;
 import butterknife.BindView;
@@ -56,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     FloatingActionButton fab;
     @BindView(R.id.drawer)
     DrawerLayout drawer;
+    @BindView(R.id.avi)
+    AVLoadingIndicatorView avi;
 
     FirebaseHelper firebaseHelper;
     MyFragmentAdapter adapter;
@@ -168,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     private void setupViewPager(ViewPager viewPager) {
         adapter = new MyFragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(SearchFragment.newInstance(), getString(R.string.title_activity_search_chat));
-        //adapter.addFragment(ChatsFragment.newInstance(androidID), getString(R.string.title_activity_historial));
+        adapter.addFragment(ChatsFragment.newInstance(androidID), getString(R.string.title_activity_historial));
         adapter.addFragment(TrendFragment.newInstance(), getString(R.string.title_activity_trend));
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(currentItem);
@@ -219,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         // Handle navigation view item clicks here.
         switch (item.getItemId()) {
             case R.id.nav_main:
+                stopAnim();
                 Snackbar.make(fab, "R.id.nav_main", Snackbar.LENGTH_LONG).show();
                 break;
         }
@@ -241,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         switch (currentItem){
             //SEARCH FRAGMENT
             case 0:
+                startAnim();
                 ((SearchFragment) fragments.get(0)).startChat();
                 break;
             case 1:
@@ -251,14 +259,13 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     @Override
-    public void onChatChangedListener(boolean success, List<HistorialChat> historialChats) {
+    public void onChatChangedListener(boolean success, List<RandomChat> chats) {
         //int currentItem = viewPager.getCurrentItem();
         List<Fragment> fragments = getSupportFragmentManager().getFragments();
 
-        success = false;
         if (success && fragments != null){
             if (fragments.get(1)!=null){
-                ((ChatsFragment) fragments.get(1)).setData(historialChats);
+                ((ChatsFragment) fragments.get(1)).setData(chats);
             }else{
                 Toast.makeText(getActivity(), "fragments.get(1)==null", Toast.LENGTH_LONG).show();
             }
@@ -283,5 +290,17 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     protected void onDestroy() {
         firebaseHelper.setOff();
         super.onDestroy();
+    }
+
+    void startAnim(){
+        avi.setVisibility(View.VISIBLE);
+        avi.show();
+        // or avi.smoothToShow();
+    }
+
+    void stopAnim(){
+        avi.setVisibility(View.GONE);
+        avi.hide();
+        // or avi.smoothToHide();
     }
 }

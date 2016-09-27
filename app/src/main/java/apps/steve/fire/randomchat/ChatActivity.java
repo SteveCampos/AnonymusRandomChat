@@ -52,6 +52,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
+
 public class ChatActivity extends AppCompatActivity implements SizeNotifierRelativeLayout.SizeNotifierRelativeLayoutDelegate, NotificationCenter.NotificationCenterDelegate, OnRoomListener {
 
     private static final String TAG = ChatActivity.class.getSimpleName();
@@ -65,30 +66,34 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     private int keyboardHeight;
     private boolean keyboardVisible;
     private WindowManager.LayoutParams windowLayoutParams;
-    private String android_id = "ANDROID_ID_UNRESOLVED";
-
-    //DATABASE REFERENCES
-    DatabaseReference randomChat;
-    FirebaseDatabase database;
 
     private boolean isHistorialCreated;
 
-    @BindView(R.id.recycler) RecyclerView recycler;
-    @BindView(R.id.chat_edit_text1) EditText chatEditText1;
-    @BindView(R.id.enter_chat1) ImageView enterChatView1;
-    @BindView(R.id.emojiButton) ImageView emojiButton;
-    @BindView(R.id.chat_layout) SizeNotifierRelativeLayout sizeNotifierRelativeLayout;
-    @BindView(R.id.my_toolbar) Toolbar toolbar;
-    @BindView(R.id.tb_title) TextView title;
-    @BindView(R.id.tb_last_connection) TextView textLastConnection;
-    @BindView(R.id.av_top_banner) AdView mAdView;
+    @BindView(R.id.recycler)
+    RecyclerView recycler;
+    @BindView(R.id.chat_edit_text1)
+    EditText chatEditText1;
+    @BindView(R.id.enter_chat1)
+    ImageView enterChatView1;
+    @BindView(R.id.emojiButton)
+    ImageView emojiButton;
+    @BindView(R.id.chat_layout)
+    SizeNotifierRelativeLayout sizeNotifierRelativeLayout;
+    @BindView(R.id.my_toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.tb_title)
+    TextView title;
+    @BindView(R.id.tb_last_connection)
+    TextView textLastConnection;
+    @BindView(R.id.av_top_banner)
+    AdView mAdView;
 
     private FirebaseRoom firebaseRoom;
 
     public String androidID;
-    private String androidIDReceptor;
-    private boolean isRecepterOnline = false;
 
+    private Emisor me;
+    private Emisor him;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,72 +109,10 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
             isHistorialCreated = savedInstanceState.getBoolean("isHistorialCreated");
         }
 
-        android_id = Settings.Secure.getString(this.getContentResolver(),
+        androidID = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
-
-
         String key_random = getIntent().getStringExtra("key_random");
-        String start_type = getIntent().getStringExtra("start_type");
-
-        androidID = getIntent().getStringExtra("android_id");
-        androidIDReceptor = getIntent().getStringExtra("android_id_receptor");
-
-
-
         firebaseRoom = new FirebaseRoom(key_random, androidID, this);
-
-        if (!TextUtils.isEmpty(androidIDReceptor) && !TextUtils.isEmpty(androidID)){
-            /*if (!androidID.equals(android_id)){
-                androidIDReceptor = androidID;
-                androidID = android_id;
-            }*/
-            firebaseRoom.listenReceptorConnection(androidIDReceptor);
-        }
-
-        // FIRE DATABASE INSTANCE
-        //database = FirebaseDatabase.getInstance();
-        //randomChat = database.getReference(Constants.CHILD_RANDOMS).child(key_random).child(Constants.CHILD_MESSAGES);
-
-
-
-
-        // Attach an listener to read the data at our posts reference
-        /*randomChat.limitToLast(10).addValueEventListener(new com.google.firebase.database.ValueEventListener() {
-            @Override
-            public void onDataChange(com.google.firebase.database.DataSnapshot dataSnapshot) {
-
-                Log.d(Constants.TAG,"There are " + dataSnapshot.getChildrenCount() + " messages");
-                chatMessages.clear();
-                for (com.google.firebase.database.DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                    ChatMessage message = postSnapshot.getValue(ChatMessage.class);
-                    Log.d(Constants.TAG, message.getMessageText() + " - " + message.getAndroidID());
-                    //SI LO ESTÁ LEYENDO DEL SERVER, ESO QUIERO DECIR, QUE YA ESTÁ EN EL SERVER, SIEMPRE.
-                    message.setMessageStatus(Constants.DELIVERED);
-                    chatMessages.add(message);
-                }
-
-                if(chatAdapter!=null)
-                    chatAdapter.notifyDataSetChanged();
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(Constants.TAG,"The read failed: " + databaseError.getMessage());
-                Toast.makeText(getActivity(), "THE READ FAILED : " + databaseError.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });*/
-
-        manageType(start_type, key_random);
-
-        // Display icon in the toolbar
-        /*
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setLogo(R.drawable.ic_arrow_back_white_24dp);
-        getSupportActionBar().setDisplayUseLogoEnabled(true);
-        */
-
-
     }
 
     private void initViews() {
@@ -218,11 +161,12 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         mAdView.loadAd(adRequest);
     }
 
-    private void setRecyclerView(){
+    private void setRecyclerView() {
         recycler.setLayoutManager(new LinearLayoutManager(this));
-        chatAdapter= new ChatAdapter(chatMessages, this);
+        chatAdapter = new ChatAdapter(chatMessages, this);
         recycler.setAdapter(chatAdapter);
     }
+
     private void setToolbar() {
 
         setSupportActionBar(toolbar);
@@ -232,68 +176,10 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
             @Override
             public void onClick(View v) {
                 finish();
-                //Toast.makeText(getActivity(), "Navigation Icon Clicked.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void manageType(String start_type, String key_random){
-
-        Log.d(TAG, "START TYPE: "+ start_type);
-        title.setText("");
-        textLastConnection.setText(R.string.chat_state_waiting);
-        switch (start_type){
-            case Constants._HERE:
-                //Receptor me = getIntent().getParcelableExtra("me");
-                //String ageGroup = getAgeGroup(Constants.Genero.valueOf(me.getLooking().getGenero()), me.getEdad());
-                break;
-            case Constants._PARED:
-                //AQUÍ CREAR LOS REGISTROS DE CHAT, POR CADA USUARIO.
-                //ANTES DE REALIZAR ESO, CREAR A LOS USUARIOS
-
-
-                Emisor receptor_me = getIntent().getParcelableExtra("me");
-                Log.d(TAG, "RECEPTOR ME");
-                Log.d(TAG, "PARED TYPE : "  + receptor_me.getClass().getSimpleName());
-                Log.d(TAG, "PARED KEY DEVICE : "  + receptor_me.getKeyDevice());
-                Log.d(TAG, "PARED EDAD : "  + receptor_me.getEdad());
-                Log.d(TAG, "PARED GENERO : "  + receptor_me.getGenero());
-                Log.d(TAG, "PARED LOOGINK GENERO : "  + receptor_me.getLooking().getGenero());
-                Emisor emisor = getIntent().getParcelableExtra("emisor");
-                Log.d(TAG, "EMISRO HER/HIM");
-                Log.d(TAG, "PARED TYPE : "  + emisor.getClass().getSimpleName());
-                Log.d(TAG, "PARED KEY DEVICE : "  + emisor.getKeyDevice());
-                Log.d(TAG, "PARED EDAD : "  + emisor.getEdad());
-                Log.d(TAG, "PARED GENERO : "  + emisor.getGenero());
-                Log.d(TAG, "PARED LOOGINK GENERO : "  + receptor_me.getLooking().getGenero());
-
-                Chater c_me = new Chater(receptor_me);
-                Log.d(TAG, "RECEPTOR CHATER ME");
-                Log.d(TAG, "PARED TYPE : "  + c_me.getClass().getSimpleName());
-                Log.d(TAG, "PARED KEY DEVICE : "  + c_me.getKeyDevice());
-                Log.d(TAG, "PARED EDAD : "  + c_me.getEdad());
-                Log.d(TAG, "PARED GENERO : "  + c_me.getGenero());
-                Log.d(TAG, "PARED LOOGINK GENERO : "  + c_me.getLooking().getGenero());
-
-                Chater c_emisor = new Chater(emisor);
-
-                Log.d(TAG, "CHATER EMISOR HER/HIM");
-                Log.d(TAG, "PARED TYPE : "  + c_emisor.getClass().getSimpleName());
-                Log.d(TAG, "PARED KEY DEVICE : "  + c_emisor.getKeyDevice());
-                Log.d(TAG, "PARED EDAD : "  + c_emisor.getEdad());
-                Log.d(TAG, "PARED GENERO : "  + c_emisor.getGenero());
-                Log.d(TAG, "PARED LOOGINK GENERO : "  + c_emisor.getLooking().getGenero());
-
-
-                firebaseRoom.createHistoryChat(androidID, new Chater(receptor_me), new Chater(emisor));
-                //createHistoChats(key_random, new Chater(receptor_me), new Chater(emisor));
-                break;
-            case Constants._NOTIFICATION:
-                break;
-            default:
-                break;
-        }
-    }
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -317,8 +203,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
                 EditText editText = (EditText) v;
 
-                if(v==chatEditText1)
-                {
+                if (v == chatEditText1) {
                     sendMessage(editText.getText().toString(), Constants.MESSAGE_TEXT);
                 }
 
@@ -335,8 +220,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         @Override
         public void onClick(View v) {
 
-            if(v==enterChatView1)
-            {
+            if (v == enterChatView1) {
                 sendMessage(chatEditText1.getText().toString(), Constants.MESSAGE_TEXT);
             }
 
@@ -352,59 +236,39 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
         @Override
         public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-
             Log.d(TAG, "onTextChanged chatEditText1.getText().toString(): " + chatEditText1.getText().toString());
-            /*if (chatEditText1.getText().toString().equals("")) {
-
-            } else {
-                //enterChatView1.setImageResource(R.drawable.ic_chat_send);
-                //firebaseRoom.changeState(Constants.CHAT_STATE_NO_ACTION);
-            }*/
         }
 
         @Override
         public void afterTextChanged(Editable editable) {
             Log.d(TAG, "afterTextChanged editable.length(): " + editable.length());
-            if(editable.length()==0){
+            if (editable.length() == 0) {
                 enterChatView1.setImageResource(R.drawable.ic_chat_send);
-                firebaseRoom.changeState(Constants.CHAT_STATE_NO_ACTION);
-            }else{
+                firebaseRoom.changeAction(Constants.CHAT_STATE_NO_ACTION);
+            } else {
                 enterChatView1.setImageResource(R.drawable.ic_chat_send_active);
-                firebaseRoom.changeState(androidID + Constants.CHAT_STATE_WRITING);
+                firebaseRoom.changeAction(androidID + Constants.CHAT_STATE_WRITING);
             }
         }
     };
 
-    private void sendMessage(final String messageText, final String messageType){
+    private void sendMessage(final String messageText, final String messageType) {
 
-        if(messageText.trim().length()==0)
+        if (messageText.trim().length() == 0)
             return;
 
 
         final ChatMessage message = new ChatMessage();
         message.setMessageStatus(Constants.SENT);
         message.setMessageText(messageText);
-        message.setAndroidID(android_id);
+        message.setAndroidID(androidID);
         message.setMessageType(messageType);
         message.setMessageTime(new Date().getTime());
         chatMessages.add(message);
 
-        firebaseRoom.sendMessage(androidID, androidIDReceptor, message, isRecepterOnline ,calculateMessagesNoReaded());
+        firebaseRoom.sendMessage(message);
     }
-
-    private List<String> calculateMessagesNoReaded(){
-        List<String> messageNoReaded = new ArrayList<>();
-        for (int i=0; i< chatMessages.size(); i++){
-            if (chatMessages.get(i).getMessageStatus() != Constants.READED && chatMessages.get(i).getAndroidID().equals(androidID)){ //&& chatMessages.get(i).getAndroidID().equals(androidID)
-                messageNoReaded.add(chatMessages.get(i).getMessageText());
-            }
-        }
-        Log.d(TAG, "messageNoReaded.size(): " +messageNoReaded.size());
-        return messageNoReaded;
-    }
-
-    private AppCompatActivity getActivity()
-    {
+    private AppCompatActivity getActivity() {
         return this;
     }
 
@@ -492,8 +356,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
                 return;
             }
 
-        }
-        else {
+        } else {
             removeEmojiWindow();
             if (sizeNotifierRelativeLayout != null) {
                 sizeNotifierRelativeLayout.post(new Runnable() {
@@ -518,7 +381,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(Constants.TAG, ""+item.getTitle());
+        Log.d(Constants.TAG, "" + item.getTitle());
         switch (item.getItemId()) {
             case R.id.action_settings:
                 // User chose the "Settings" item, show the app settings UI...
@@ -556,7 +419,6 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     }
 
 
-
     /**
      * Hides the emoji popup
      */
@@ -574,7 +436,6 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     public boolean isEmojiPopupShowing() {
         return showingEmoji;
     }
-
 
 
     /**
@@ -661,6 +522,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
     /**
      * Get the system status bar height
+     *
      * @return
      */
     public int getStatusBarHeight() {
@@ -691,11 +553,6 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     }
 
     @Override
-    public void onChatHistoryCreated(boolean success, String error) {
-
-    }
-
-    @Override
     public void onMessagedSended(boolean success, ChatMessage message, String error) {
 
     }
@@ -703,7 +560,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     @Override
     public void onReadMessages(List<ChatMessage> messages) {
         chatMessages.clear();
-        Log.d(TAG, "onReadMessages size: "+ messages.size());
+        Log.d(TAG, "onReadMessages size: " + messages.size());
         chatMessages.addAll(messages);
         if (chatAdapter != null) {
             chatAdapter.notifyDataSetChanged();
@@ -713,37 +570,78 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         firebaseRoom.setReaded(messages);
     }
 
+    @Override
+    public void onMeReaded(Emisor me) {
+        Log.d(TAG, "onMeReaded");
+        if (me == null) {
+            return;
+        }
+
+        this.me = me;
+
+        String genero = null;
+        switch (Constants.Genero.valueOf(me.getLooking().getGenero())) {
+            case CHICO:
+                genero = getString(R.string.boy);
+                break;
+            case CHICA:
+                genero = getString(R.string.girl);
+                break;
+        }
+
+        title.setText(genero);
+
+    }
+
+    @Override
+    public void onHimReaded(Emisor him) {
+        Log.d(TAG, "onHimReaded");
+        if (him==null){
+            return;
+        }
+        this.him = him;
+    }
 
 
     @Override
     public void onReceptorConnectionChanged(String state, long lastConnection) {
-        Log.d(TAG, "onReceptorConnectionChanged state: " + state+", lastConnection: " + lastConnection);
-        if (textLastConnection!=null){
-            if (state.equals(Constants.STATE_ONLINE)){
-                isRecepterOnline = true;
+        Log.d(TAG, "onReceptorConnectionChanged state: " + state + ", lastConnection: " + lastConnection);
+        if (textLastConnection != null) {
+            if (state.equals(Constants.STATE_ONLINE)) {
                 textLastConnection.setText(R.string.state_online);
-            }else {
-                isRecepterOnline = false;
+            } else {
                 textLastConnection.setText(Utils.calculateLastConnection(new Date(lastConnection), new Date(), getActivity()));
             }
         }
     }
 
     @Override
-    public void onChatStateChanged(String state) {
-        Log.d(TAG, "onChatStateChanged state: " + state);
-        if (textLastConnection!=null){
-            if (state.equals(androidIDReceptor + Constants.CHAT_STATE_WRITING)){
-                textLastConnection.setText(R.string.chat_state_writing);
-            }else if(state.equals(Constants.CHAT_STATE_NO_ACTION)){
-                if (isRecepterOnline){
-                    textLastConnection.setText(R.string.state_online);
-                }
-            }if (state.equals(Constants.CHAT_STATE_PARED)){
-                //Display and amazing message here! Chat is pared!
-                Toast.makeText(getActivity(), Constants.CHAT_STATE_PARED, Toast.LENGTH_SHORT).show();
+    public void onRoomStateChanged(String state) {
+        Log.d(TAG, "onRoomStateChanged state: " + state);
+
+        String lastConnection = "";
+        if (state.equals(Constants.CHAT_STATE_WAITING)) {
+            lastConnection = getString(R.string.chat_state_waiting);
+        } else if (state.equals(Constants.CHAT_STATE_PARED)) {
+            lastConnection = getString(R.string.chat_state_pared);
+            Snackbar.make(toolbar, lastConnection, Snackbar.LENGTH_LONG).show();
+        }
+
+        textLastConnection.setText(lastConnection);
+    }
+
+    @Override
+    public void onRoomActionChanged(String action) {
+        Log.d(TAG, "onRoomActionChanged action: " + action);
+
+        if (him == null || me == null){
+            return;
+        }
+
+        if (action.equals(him.getKeyDevice() + Constants.CHAT_STATE_WRITING)) {
+            textLastConnection.setText(R.string.chat_state_writing);
+        } else if (action.equals(Constants.CHAT_STATE_NO_ACTION)) {
                 textLastConnection.setText(R.string.state_online);
-            }
         }
     }
 }

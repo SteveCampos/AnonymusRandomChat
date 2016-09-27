@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="search_fragment_action_looking">Buscando …</string>
     <string name="app_name">Chat Anónimo</string>
     <string name="historial_action_chat">Chat</string>
     <string name="type_your_message">Enter msg</string>
@@ -10,6 +9,7 @@
 
     <string name="chat_state_writing">Escribiendo…</string>
     <string name="chat_state_waiting">Esperando…</string>
+    <string name="chat_state_pared">Emparejado</string>
 
     <string name="article_emisor">Yo:</string>
     <string name="article_boy">Él:</string>
@@ -25,15 +25,11 @@
     <string name="state_online">En línea</string>
 
 
-
-    <string name="chat_conn_online">Activo(a) ahora</string>
-    <string name="chat_conn_minutes">Activo(a) hace %s minutos</string>
-    <string name="chat_conn_hours">Activo(a) hace %s horas</string>
-    <string name="chat_conn_days">Activo(a) hace %s días</string>
-
     <string name="historial_action_like">%1$s</string>
     <string name="historial_action_error">%1$s error</string>
 
+    <string name="boy">Chico</string>
+    <string name="girl">Chica</string>
 
     <string name="boy_age_group_1">Chico Joven</string>
     <string name="boy_age_group_2">Hombre Joven</string>
@@ -43,9 +39,6 @@
     <string name="girl_age_group_2">Mujer Joven</string>
     <string name="girl_age_group_3">Mujer</string>
     <string name="girl_age_group_4">Mujer Adulta</string>
-
-    <string name="language_spanish">Español</string>
-    <string name="language_english">English</string>
 
     <string-array name="genero">
         <item>Chico</item>
@@ -62,7 +55,6 @@
     <string name="title_activity_historial">Chats</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <string name="banner_top_ad_unit_id">ca-app-pub-7677000963765033/9663714103</string>
 

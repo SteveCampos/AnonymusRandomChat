@@ -385,14 +385,14 @@ public class FirebaseHelper {
                 // whenever data at this location is updated.
                 Log.d(TAG, "DataSnapshot COUNT: " + dataSnapshot.getChildrenCount());
 
-                List<HistorialChat> list = new ArrayList<HistorialChat>();
+                List<RandomChat> list = new ArrayList<>();
                 if (dataSnapshot.getChildrenCount() > 0) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                         Log.d(TAG, "CHILDREN KEY: " + postSnapshot.getKey());
 
-                        HistorialChat historialChat = postSnapshot.getValue(HistorialChat.class);
-                        Log.d(TAG, historialChat.getKeyChat());
-                        list.add(historialChat);
+                        RandomChat chat = postSnapshot.getValue(RandomChat.class);
+                        Log.d(TAG, chat.getKeyChat());
+                        list.add(chat);
                     }
                 }
 

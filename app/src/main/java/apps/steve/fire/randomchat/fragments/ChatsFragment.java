@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import apps.steve.fire.randomchat.ChatActivity;
 import apps.steve.fire.randomchat.Constants;
@@ -24,6 +25,7 @@ import apps.steve.fire.randomchat.firebase.FirebaseChats;
 import apps.steve.fire.randomchat.interfaces.OnChatsListener;
 import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.model.HistorialChat;
+import apps.steve.fire.randomchat.model.RandomChat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -31,6 +33,7 @@ import butterknife.ButterKnife;
  * A simple {@link Fragment} subclass.
  */
 public class ChatsFragment extends Fragment implements HistorialChatAdapter.OnStartChatListener{
+
 
     @BindView(R.id.my_recycler_view)
     RecyclerView recyclerView;
@@ -67,29 +70,28 @@ public class ChatsFragment extends Fragment implements HistorialChatAdapter.OnSt
         recyclerView.setAdapter(adapter);
     }
 
-    public void setData(List<HistorialChat> list){
+    public void setData(List<RandomChat> list){
         if (adapter!=null){
             adapter.setData(list);
         }
     }
 
     @Override
-    public void onStartChat(HistorialChat item, View view, boolean liked) {
+    public void onStartChat(RandomChat item, View view, boolean liked) {
         //Snackbar.make(recyclerView, item.getEmisor().getGenero(), Snackbar.LENGTH_LONG).show();
         launchChatActivity(item, Constants._HERE);
     }
 
-    private void launchChatActivity(HistorialChat historialChat, String start_type) {
+    private void launchChatActivity(RandomChat item, String start_type) {
         // first parameter is the context, second is the class of the activity to launch
         Intent i = new Intent(getActivity(), ChatActivity.class);
         // put "extras" into the bundle for access in the second activity
-        i.putExtra("key_random", historialChat.getKeyChat());
-        i.putExtra("start_type", start_type);
+        i.putExtra("key_random", item.getKeyChat());
+        /*i.putExtra("start_type", start_type);
         i.putExtra("android_id", historialChat.getMe().getKeyDevice());
-        i.putExtra("android_id_receptor", historialChat.getEmisor().getKeyDevice());
+        i.putExtra("android_id_receptor", historialChat.getEmisor().getKeyDevice());*/
         // brings up the second activity
         startActivity(i);
     }
-
 
 }
