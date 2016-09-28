@@ -39,6 +39,8 @@ public class RandomChat {
     private ChatMessage lastMessage;
     private int noReaded;
 
+    private String himName;
+
     public RandomChat() {
 
     }
@@ -121,6 +123,14 @@ public class RandomChat {
 
     public void setNoReaded(int noReaded) {
         this.noReaded = noReaded;
+    }
+
+    public String getHimName() {
+        return himName;
+    }
+
+    public void setHimName(String himName) {
+        this.himName = himName;
     }
 
     @Exclude

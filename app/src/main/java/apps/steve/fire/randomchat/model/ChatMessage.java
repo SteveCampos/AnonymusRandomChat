@@ -104,7 +104,7 @@ public class ChatMessage {
                 "",
                 Constants.SENT,
                 Constants.MESSAGE_TEXT,
-                new Date().getTime(),
+                -new Date().getTime(),
                 ""
         );
     }

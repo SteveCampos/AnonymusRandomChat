@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
 
+import com.google.android.gms.common.api.BooleanResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -14,6 +15,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Map;
 
@@ -55,26 +57,31 @@ public class FirebaseRoom {
     private DatabaseReference stateReference;
     private DatabaseReference actionReference;
 
+
+    private DatabaseReference userHistoRoomRef;
+    private DatabaseReference userHistoRoomHotRef;
     private String androidID;
 
-    ValueEventListener messagesListener;
-    ValueEventListener chatStateListener;
-    //ValueEventListener randomReceptorListener;
-    //ValueEventListener randomEmisorListener;
+    private ValueEventListener messagesListener;
 
-    ValueEventListener roomChatterListener;
-    ValueEventListener roomReceptorListener;
-    ValueEventListener stateListener;
-    ValueEventListener actionListener;
+    private ValueEventListener roomChatterListener;
+    private ValueEventListener stateListener;
+    private ValueEventListener actionListener;
+
+    private ValueEventListener userRoomHotListener;
+
 
     private Emisor me;
     private Emisor him;
     private String action;
     private String state;
 
-    List<ChatMessage> messages = new ArrayList<ChatMessage>();
+    private List<ChatMessage> messages = new ArrayList<ChatMessage>();
 
     private Connection himConnection;
+
+    private boolean hot = false;
+
 
     public FirebaseRoom(String key, String androidID, OnRoomListener listener) {
         this.key = key;
@@ -90,8 +97,18 @@ public class FirebaseRoom {
         this.roomEmisorReference = roomReference.child("emisor");
         this.stateReference = roomReference.child("estado");
         this.actionReference = roomReference.child("action");
+
+        this.userHistoRoomRef = userReference.child(androidID).child(Constants.CHILD_USERS_HISTO_CHATS).child(key);
+        this.userHistoRoomHotRef = userHistoRoomRef.child("hot");
+
+
+        roomReference.keepSynced(true);
+        messagesReference.keepSynced(true);
+
+
         //listenRandomReceptor();
         listenRoom();
+        listenHot();
     }
 
     private void listenRoom() {
@@ -177,14 +194,13 @@ public class FirebaseRoom {
         messagePost.put(messagePath, messageValues);
 
 
-
         if (me != null) {
 
             String to = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
             messagePost.put(to + "/lastMessage", messageValues);
 
 
-            if (him != null){
+            if (him != null) {
 
                 String toReceptor = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
                 String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + him.getKeyDevice() + "/" + androidID;
@@ -196,7 +212,7 @@ public class FirebaseRoom {
                 messagePost.put(toReceptor + "/noReaded", messageNoReaded.size());
 
                 if (himConnection != null) {
-                    if (! himConnection.getState().equals(Constants.STATE_ONLINE)) {
+                    if (!himConnection.getState().equals(Constants.STATE_ONLINE)) {
                         String messages = getStringofArray(messageNoReaded);
                         messagePost.put(notificationPath, new Notification(messages, androidID, key, androidID, Constants.SENT).toMap());
 
@@ -241,77 +257,42 @@ public class FirebaseRoom {
         return messages;
     }
 
-    /*
-    public void createHistoryChat(String android_id, Chater me, Chater emisor) {
+    public void hot() {
 
+        Log.d(TAG, "isHot: " + hot);
 
-        String pathToHisto = "/" + android_id + "/" + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
-        String pathToHistoReceptor = "/" + emisor.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
+        Map<String, Object> hotMap = new HashMap<>();
+        hotMap.put("hot", !hot);
 
-        if (!android_id.equals(me.getKeyDevice())) {
-            pathToHisto = "/" + emisor.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
-            pathToHistoReceptor = "/" + android_id + "/" + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
-        }
-
-
-        Map<String, Object> histo_user_me = new HashMap<>();
-
-        histo_user_me.put(pathToHisto + "/keyChat", key);
-        histo_user_me.put(pathToHisto + "/star", false);
-        histo_user_me.put(pathToHisto + "/hot", false);
-        histo_user_me.put(pathToHisto + "/like", false);
-        histo_user_me.put(pathToHisto + "/noReaded", 0);
-        histo_user_me.put(pathToHisto + "/lastMessage/messageText", "No messages.");
-        histo_user_me.put(pathToHisto + "/lastMessage/androidID", android_id);
-        histo_user_me.put(pathToHisto + "/lastMessage/messageStatus", Constants.SENT);
-        histo_user_me.put(pathToHisto + "/lastMessage/messageType", Constants.MESSAGE_TEXT);
-        histo_user_me.put(pathToHisto + "/lastMessage/messageTime", new Date().getTime());
-
-
-        histo_user_me.put(pathToHisto + "/me/edad", me.getEdad());
-        histo_user_me.put(pathToHisto + "/me/genero", me.getGenero());
-        histo_user_me.put(pathToHisto + "/me/keyDevice", me.getKeyDevice());
-        histo_user_me.put(pathToHisto + "/me/looking/edadMin", me.getLooking().getEdadMin());
-        histo_user_me.put(pathToHisto + "/me/looking/edadMax", me.getLooking().getEdadMax());
-        histo_user_me.put(pathToHisto + "/me/looking/genero", me.getLooking().getGenero());
-        histo_user_me.put(pathToHisto + "/emisor/edad", emisor.getEdad());
-        histo_user_me.put(pathToHisto + "/emisor/genero", emisor.getGenero());
-        histo_user_me.put(pathToHisto + "/emisor/keyDevice", emisor.getKeyDevice());
-        histo_user_me.put(pathToHisto + "/emisor/looking/edadMin", emisor.getLooking().getEdadMin());
-        histo_user_me.put(pathToHisto + "/emisor/looking/edadMax", emisor.getLooking().getEdadMax());
-        histo_user_me.put(pathToHisto + "/emisor/looking/genero", emisor.getLooking().getGenero());
-
-        histo_user_me.put(pathToHistoReceptor + "/keyChat", key);
-        histo_user_me.put(pathToHistoReceptor + "/star", false);
-        histo_user_me.put(pathToHistoReceptor + "/hot", false);
-        histo_user_me.put(pathToHistoReceptor + "/like", false);
-        histo_user_me.put(pathToHistoReceptor + "/noReaded", 0);
-        histo_user_me.put(pathToHistoReceptor + "/lastMessage/messageText", "No messages.");
-        histo_user_me.put(pathToHistoReceptor + "/lastMessage/androidID", emisor.getKeyDevice());
-        histo_user_me.put(pathToHistoReceptor + "/lastMessage/messageStatus", Constants.SENT);
-        histo_user_me.put(pathToHistoReceptor + "/lastMessage/messageType", Constants.MESSAGE_TEXT);
-        histo_user_me.put(pathToHistoReceptor + "/lastMessage/messageTime", new Date().getTime());
-
-        histo_user_me.put(pathToHistoReceptor + "/me/edad", emisor.getEdad());
-        histo_user_me.put(pathToHistoReceptor + "/me/genero", emisor.getGenero());
-        histo_user_me.put(pathToHistoReceptor + "/me/keyDevice", emisor.getKeyDevice());
-        histo_user_me.put(pathToHistoReceptor + "/me/looking/edadMin", emisor.getLooking().getEdadMin());
-        histo_user_me.put(pathToHistoReceptor + "/me/looking/edadMax", emisor.getLooking().getEdadMax());
-        histo_user_me.put(pathToHistoReceptor + "/me/looking/genero", emisor.getLooking().getGenero());
-        histo_user_me.put(pathToHistoReceptor + "/emisor/edad", me.getEdad());
-        histo_user_me.put(pathToHistoReceptor + "/emisor/genero", me.getGenero());
-        histo_user_me.put(pathToHistoReceptor + "/emisor/keyDevice", me.getKeyDevice());
-        histo_user_me.put(pathToHistoReceptor + "/emisor/looking/edadMin", me.getLooking().getEdadMin());
-        histo_user_me.put(pathToHistoReceptor + "/emisor/looking/edadMax", me.getLooking().getEdadMax());
-        histo_user_me.put(pathToHistoReceptor + "/emisor/looking/genero", me.getLooking().getGenero());
-
-        firebaseDatabase.getReference(Constants.CHILD_USERS).updateChildren(histo_user_me, new DatabaseReference.CompletionListener() {
+        userHistoRoomRef.updateChildren(hotMap, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                //listener.onChatHistoryCreated(databaseError == null, databaseError != null ? databaseError.getMessage() : null);
+                if (databaseError != null){
+                    listener.onRoomHot(!hot);
+                }
             }
         });
-    }*/
+    }
+
+    private void listenHot() {
+        userRoomHotListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "userRoomHotListener dataSnapshot: " + dataSnapshot);
+                if (dataSnapshot!=null){
+                    hot = dataSnapshot.getValue(Boolean.class);
+                    listener.onRoomHot(hot);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "userRoomHotListener databaseError: " + databaseError);
+            }
+        };
+        userHistoRoomHotRef.addValueEventListener(userRoomHotListener);
+
+    }
 
     private void listenMessages() {
         messagesListener = new ValueEventListener() {
@@ -336,7 +317,7 @@ public class FirebaseRoom {
                 Log.d(TAG, "listenMessages databaseError: " + databaseError.getMessage());
             }
         };
-        messagesReference.limitToLast(10).addValueEventListener(messagesListener);
+        messagesReference.limitToLast(20).addValueEventListener(messagesListener);
     }
 
     public void removeMessageListener() {
@@ -345,7 +326,7 @@ public class FirebaseRoom {
 
 
     public void setReaded(List<ChatMessage> messages) {
-        if ( me == null || him == null){
+        if (me == null || him == null) {
             return;
         }
 

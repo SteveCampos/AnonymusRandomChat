@@ -28,6 +28,10 @@
     <string name="historial_action_like">%1$s</string>
     <string name="historial_action_error">%1$s error</string>
 
+    <string name="action_undo">Deshacer</string>
+    <string name="action_hot">Hot</string>
+    <string name ="error">Error</string>
+
     <string name="boy">Chico</string>
     <string name="girl">Chica</string>
 
@@ -52,6 +56,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="title_activity_trend">Users</string>
+    <string name="title_activity_hots">Hots</string>
     <string name="title_activity_historial">Chats</string>
 
     <!-- TODO: Remove or change this placeholder text -->

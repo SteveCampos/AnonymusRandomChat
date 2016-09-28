@@ -70,6 +70,8 @@
             android:layout_alignParentTop="true"
             android:layout_marginRight="16dp"
             android:text="18:00 PM"
+            android:gravity="center_vertical"
+            android:drawablePadding="8dp"
             />
 
         <TextView

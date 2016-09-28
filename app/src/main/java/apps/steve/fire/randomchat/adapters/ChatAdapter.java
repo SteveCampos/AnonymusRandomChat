@@ -172,7 +172,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_double_check));
                     break;
                 case Constants.SENT:
-                    imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_double_check));
+                    imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check));
                     break;
 
             }
@@ -226,7 +226,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_double_check));
                     break;
                 case Constants.SENT:
-                    imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_double_check));
+                    imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check));
                     break;
 
             }

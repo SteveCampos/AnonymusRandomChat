@@ -42,25 +42,41 @@ public class FirebaseHelper {
 
     private DatabaseReference refRandoms;
     private DatabaseReference refUsers;
+    private DatabaseReference chatsReference;
+
+
     private OnSearchListener listener;
 
     private OnChatsListener listenerChats;
-    private DatabaseReference chatsReference;
 
     private String androidID;
 
     //Listeners
-    ValueEventListener nodeRandoms;
-    ValueEventListener chatsListener;
+    private ValueEventListener nodeRandoms;
+    private ValueEventListener chatsListener;
+    private ValueEventListener chatsHotListener;
+
 
     private Context context;
-    Query queryChats;
+    private Query queryChats;
+    private Query queryChatsHot;
+
+    private static boolean isPersisted = false;
 
     public FirebaseHelper(Context context) {
+        if (!isPersisted){
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+            isPersisted = true;
+        }
         this.firebaseDatabase = FirebaseDatabase.getInstance();
         this.refRandoms = firebaseDatabase.getReference(Constants.CHILD_RANDOMS);
         this.refUsers = firebaseDatabase.getReference(Constants.CHILD_USERS);
         this.context = context;
+
+        //PERSISTENCE ENABLED
+        refRandoms.keepSynced(false);
+        refUsers.keepSynced(false);
+
     }
 
     public void createUser(String id, User user) {
@@ -372,13 +388,52 @@ public class FirebaseHelper {
 
         this.androidID = androidID;
         this.chatsReference = firebaseDatabase.getReference(Constants.CHILD_USERS).child(androidID).child(Constants.CHILD_USERS_HISTO_CHATS);
+        chatsReference.keepSynced(true);
         this.listenerChats = listenerChats;
         listenChats();
+        listenChatsHot();
+    }
+
+    private void listenChatsHot() {
+        queryChatsHot = chatsReference.orderByChild("hot").equalTo(true);
+        chatsHotListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "listenChatsHot DataSnapshot COUNT: " + dataSnapshot.getChildrenCount());
+                List<RandomChat> list = new ArrayList<>();
+                if (dataSnapshot.getChildrenCount() > 0) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        Log.d(TAG, "CHILDREN KEY: " + postSnapshot.getKey());
+
+                        RandomChat chat = postSnapshot.getValue(RandomChat.class);
+                        Log.d(TAG, chat.getKeyChat());
+                        list.add(chat);
+                    }
+                }
+
+                if (listenerChats!=null){
+                    listenerChats.onChatsHotListener(list.size()>0, list);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                if (listenerChats!=null){
+                    listenerChats.onChatsHotListener(false, null);
+                }
+            }
+        };
+
+        queryChatsHot.addValueEventListener(chatsHotListener);
     }
 
     public void removeChatsListener(){
         //chatsReference.removeEventListener(chatsListener);
         queryChats.removeEventListener(chatsListener);
+    }
+
+    public void removeChat(){
+
     }
 
     private void listenChats() {

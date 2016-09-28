@@ -71,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     int currentItem;
     String androidID;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -176,9 +178,10 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     // Add Fragments to Tabs
     private void setupViewPager(ViewPager viewPager) {
         adapter = new MyFragmentAdapter(getSupportFragmentManager());
+
         adapter.addFragment(SearchFragment.newInstance(), getString(R.string.title_activity_search_chat));
         adapter.addFragment(ChatsFragment.newInstance(androidID), getString(R.string.title_activity_historial));
-        adapter.addFragment(TrendFragment.newInstance(), getString(R.string.title_activity_trend));
+        adapter.addFragment(ChatsFragment.newInstance(androidID), getString(R.string.title_activity_hots));
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(currentItem);
     }
@@ -261,23 +264,98 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     private SearchFragment getSearchFragment(){
+
+
+        List<Fragment> fragments = getFragments();
+        if (fragments != null) {
+            if (fragments.get(0) instanceof SearchFragment) {
+                Log.d(TAG, "fragments.get(0) instanceof SearchFragment");
+                return (SearchFragment) fragments.get(0);
+            } else {
+                Log.d(TAG, "fragments.get(0) instanceof SearchFragment: " + null);
+                return null;
+            }
+        }else {
+            return null;
+        }
+    }
+
+    private List<Fragment>  getFragments(){
         List<Fragment> fragments = getSupportFragmentManager().getFragments();
-        Log.d(TAG, "getSupportFragmentManager().getFragments().size(): "+ fragments.size());
-        return (SearchFragment) fragments.get(0);
+        if (fragments != null){
+            Log.d(TAG, "getSupportFragmentManager().getFragments().size(): "+ fragments.size());
+            for (int i= 0; i< fragments.size(); i++){
+
+                Log.d(TAG, "FRAGMENT: " + i );
+                if (fragments.get(i)!=  null){
+                    Log.d(TAG, "TAG : " + fragments.get(i).getTag());
+                }
+            }
+        }
+        return fragments;
+    }
+
+    private ChatsFragment getChatsFragment(){
+
+        List<Fragment> fragments = getFragments();
+        if (fragments != null){
+            if (fragments.get(1) instanceof ChatsFragment){
+                Log.d(TAG, "fragments.get(1) instanceof ChatsFragment");
+                return (ChatsFragment) fragments.get(1);
+            }else
+            {
+                Log.d(TAG, "fragments.get(1) instanceof ChatsFragment: " + null);
+                return null;
+            }
+        }else{
+            return null;
+        }
+
+    }
+
+    private ChatsFragment getHotsFragment(){
+
+        List<Fragment> fragments = getFragments();
+        if (fragments != null) {
+            if (fragments.size() > 2) {
+                if (fragments.get(2) instanceof ChatsFragment) {
+                    Log.d(TAG, "fragments.get(2) instanceof ChatsFragment");
+                    return (ChatsFragment) fragments.get(2);
+                } else if (fragments.get(3) instanceof ChatsFragment){
+                    return  (ChatsFragment) fragments.get(3);
+                }else{
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }else{
+            return null;
+        }
     }
 
     @Override
     public void onChatChangedListener(boolean success, List<RandomChat> chats) {
         //int currentItem = viewPager.getCurrentItem();
-        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+        Log.d(TAG, "onChatChangedListener success: " + success);
 
-        if (success && fragments != null){
-            if (fragments.get(1)!=null){
-                ((ChatsFragment) fragments.get(1)).setData(chats);
-            }else{
-                Toast.makeText(getActivity(), "fragments.get(1)==null", Toast.LENGTH_LONG).show();
-            }
+        ChatsFragment chatsFragment = getChatsFragment();
+
+        if (success && chatsFragment != null){
+            chatsFragment.setData(chats);
         }
+    }
+
+    @Override
+    public void onChatsHotListener(boolean success, List<RandomChat> chatList) {
+        Log.d(TAG, "onChatChangedListener success: " + success);
+
+        ChatsFragment hotsFragment = getHotsFragment();
+
+        if (success && hotsFragment != null){
+            hotsFragment.setData(chatList);
+        }
+
     }
 
     @Override

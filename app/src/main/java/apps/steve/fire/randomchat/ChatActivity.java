@@ -3,10 +3,12 @@ package apps.steve.fire.randomchat;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -94,6 +96,8 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
     private Emisor me;
     private Emisor him;
+
+    private boolean isHot = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -387,11 +391,10 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
                 // User chose the "Settings" item, show the app settings UI...
                 return true;
 
-            case R.id.action_favorite:
+            case R.id.action_hot:
                 // User chose the "Favorite" action, mark the current item
                 // as a favorite...
-                Log.d(Constants.TAG, "ID.action_favorite");
-                Snackbar.make(sizeNotifierRelativeLayout, "Hot.", Snackbar.LENGTH_LONG).show();
+                firebaseRoom.hot();
                 return true;
 
             default:
@@ -643,5 +646,31 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         } else if (action.equals(Constants.CHAT_STATE_NO_ACTION)) {
                 textLastConnection.setText(R.string.state_online);
         }
+    }
+
+    @Override
+    public void onRoomHot(boolean isHot) {
+        Log.d(TAG, "onRoomHot: " + isHot);
+        this.isHot = isHot;
+        invalidateOptionsMenu();
+
+        //String message = isHot ? getString(R.string.action_hot) : getString(R.string.error);
+        /*
+        if (isHot){
+            Snackbar.make(sizeNotifierRelativeLayout, getString(R.string.action_hot), Snackbar.LENGTH_LONG)
+                    .setAction(R.string.action_undo, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            firebaseRoom.hot();
+                        }
+                    }).show();
+        }*/
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        int ID = isHot ? R.drawable.ic_whatshot_red_24dp : R.drawable.ic_whatshot_black_24dp;
+        menu.findItem(R.id.action_hot).setIcon(ContextCompat.getDrawable(getActivity(), ID));
+        return super.onPrepareOptionsMenu(menu);
     }
 }

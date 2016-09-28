@@ -183,6 +183,7 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
         // Inflate the layout for this fragment
         Log.d(TAG, "onCreateView");
         view  =  inflater.inflate(R.layout.content_search_chat, container, false);
+        setRetainInstance(true);
         //ButterKnife.bind(this, view);
         //init();
         return view;

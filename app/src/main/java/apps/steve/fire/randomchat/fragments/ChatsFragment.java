@@ -61,6 +61,7 @@ public class ChatsFragment extends Fragment implements HistorialChatAdapter.OnSt
         recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
         ButterKnife.bind(this, recyclerView);
         setRecyclerView(getArguments().getString("androidID"));
+        setRetainInstance(true);
         return recyclerView;
     }
 

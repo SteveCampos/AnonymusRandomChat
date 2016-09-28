@@ -19,6 +19,7 @@ public interface OnRoomListener {
     void onHimReaded(Emisor him);
     void onRoomStateChanged(String state);
     void onRoomActionChanged(String action);
+    void onRoomHot(boolean isHot);
 
     void onReceptorConnectionChanged(String state, long lastConnection);
 }

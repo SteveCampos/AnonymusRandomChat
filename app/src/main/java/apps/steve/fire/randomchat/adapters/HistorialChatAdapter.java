@@ -108,31 +108,20 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
         switch (Constants.Genero.valueOf(interlocutorGenero)) {
             case CHICA:
                 idAvatar = R.drawable.girl_2;
-                title = mContext.getString(R.string.boy);
+                title = mContext.getString(R.string.girl);
                 break;
             case CHICO:
                 idAvatar = R.drawable.boy_1;
-                title = mContext.getString(R.string.girl);
+                title = mContext.getString(R.string.boy);
                 break;
+        }
+
+        if (!TextUtils.isEmpty(item.getHimName())){
+            title = item.getHimName();
         }
 
 
         message = item.getLastMessage().getMessageText();
-
-
-        /*
-        if (interlocutor == null){
-
-            holder.counter.setText("ESPERANDO...");
-            holder.counter.setVisibility(View.VISIBLE);
-            holder.counter.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
-            holder.time.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
-        }else{
-            interlocutorGenero = interlocutor.getGenero();
-
-
-        }*/
-
 
         if (item.getLastMessage().getAndroidID().equals(me.getKeyDevice())) {
 
@@ -161,6 +150,11 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
             }
         }
 
+        if (item.isHot()){
+            Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_whatshot_red_24dp);
+            holder.time.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
+        }
+
 
         if (interlocutor == null){
             counterMessage = mContext.getString(R.string.chat_state_waiting);
@@ -174,7 +168,7 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
                 .placeholder(idAvatar)
                 .into(holder.imageView);
 
-        holder.title.setText(interlocutorGenero);
+        holder.title.setText(title);
 
         holder.message.setText(message);
 
