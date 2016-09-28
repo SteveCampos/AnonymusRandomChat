@@ -263,7 +263,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         message.setMessageText(messageText);
         message.setAndroidID(androidID);
         message.setMessageType(messageType);
-        message.setMessageTime(new Date().getTime());
+        message.setMessageTime(-new Date().getTime()); // NEGATIVE VALUE, TO ORDERBYVALUE.
         chatMessages.add(message);
 
         firebaseRoom.sendMessage(message);

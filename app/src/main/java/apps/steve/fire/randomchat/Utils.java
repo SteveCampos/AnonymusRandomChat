@@ -184,6 +184,14 @@ public class Utils {
         return ageGroup;
     }
 
+    public static int abs(int x){
+        return x < 0 ? -x : x ;
+    }
+    public static long abs(long x){
+        return x < 0 ? -x : x ;
+    }
+
+
     //1 minute = 60 seconds
     //1 hour = 60 x 60 = 3600
     //1 day = 3600 x 24 = 86400

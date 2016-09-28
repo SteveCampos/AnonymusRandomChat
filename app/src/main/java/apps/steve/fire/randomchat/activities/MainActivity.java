@@ -236,6 +236,8 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     @OnClick(R.id.fab)
     void onFabClick(){
+        startAnim();
+
         int currentItem = viewPager.getCurrentItem();
 
         SearchFragment searchFragment = getSearchFragment();
@@ -318,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     @Override
     public void onChatLaunched(String key) {
+        firebaseHelper.removeChatsListener();
         SearchFragment searchFragment = getSearchFragment();
         if (searchFragment != null) {
             searchFragment.enabledInputs(true);

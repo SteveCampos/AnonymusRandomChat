@@ -83,7 +83,7 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
 
         final RandomChat item = mHistorial.get(position);
 
-        holder.time.setText(Utils.calculateLastConnection(new Date(item.getLastMessage().getMessageTime()), new Date(), mContext));
+        holder.time.setText(Utils.calculateLastConnection(new Date(Utils.abs(item.getLastMessage().getMessageTime())), new Date(), mContext));
 
 
         Emisor me = item.getEmisor();

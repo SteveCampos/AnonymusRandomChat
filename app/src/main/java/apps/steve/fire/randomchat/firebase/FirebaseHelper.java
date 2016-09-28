@@ -54,6 +54,7 @@ public class FirebaseHelper {
     ValueEventListener chatsListener;
 
     private Context context;
+    Query queryChats;
 
     public FirebaseHelper(Context context) {
         this.firebaseDatabase = FirebaseDatabase.getInstance();
@@ -376,10 +377,12 @@ public class FirebaseHelper {
     }
 
     public void removeChatsListener(){
-        chatsReference.removeEventListener(chatsListener);
+        //chatsReference.removeEventListener(chatsListener);
+        queryChats.removeEventListener(chatsListener);
     }
 
     private void listenChats() {
+        queryChats = chatsReference.orderByChild("lastMessage/messageTime").limitToFirst(20);
         chatsListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -414,7 +417,7 @@ public class FirebaseHelper {
                 //Toast.makeText(Historial.this, "DatabaseError: "+ databaseError, Toast.LENGTH_SHORT).show();
             }
         };
-        chatsReference.addValueEventListener(chatsListener);
+        queryChats.addValueEventListener(chatsListener);
     }
 
     public void setOff(){
