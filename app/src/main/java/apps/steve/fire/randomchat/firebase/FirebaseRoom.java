@@ -1,32 +1,25 @@
 package apps.steve.fire.randomchat.firebase;
 
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.Display;
 
-import com.google.android.gms.common.api.BooleanResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Map;
 
 import apps.steve.fire.randomchat.Constants;
 import apps.steve.fire.randomchat.interfaces.OnRoomListener;
 import apps.steve.fire.randomchat.model.ChatMessage;
-import apps.steve.fire.randomchat.model.Chater;
 import apps.steve.fire.randomchat.model.Connection;
 import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.model.Notification;
-import apps.steve.fire.randomchat.model.RandomChat;
 
 /**
  * Created by Steve on 24/08/2016.
@@ -257,6 +250,47 @@ public class FirebaseRoom {
         return messages;
     }
 
+    public void block(){
+
+        Map<String, Object> blockChat = new HashMap<>();
+
+        String roomState = "/" + Constants.CHILD_RANDOMS + "/" + key + "/" + Constants.CHILD_STATE + "/";
+        blockChat.put(roomState, Constants.CHAT_STATE_BLOCK);
+
+        if (me != null){
+            String meRoomState = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key + "/" + Constants.CHILD_STATE + "/";
+            blockChat.put(meRoomState, Constants.CHAT_STATE_BLOCK);
+
+            if (him != null){
+                String himRoomState = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key + "/" + Constants.CHILD_STATE + "/";;
+                blockChat.put(himRoomState, Constants.CHAT_STATE_BLOCK);
+            }
+        }
+
+        firebaseDatabase.getReference().updateChildren(blockChat, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                Log.d(TAG, databaseError == null ? "deleteChat true": "deleteChat databaseError: "+ databaseError);
+            }
+        });
+    }
+
+    public void setNameChat(String nameChat){
+        if (me != null){
+            Map<String, Object> roomName = new HashMap<>();
+            String meRoomHimName = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key + "/" + "himName" + "/";
+            roomName.put(meRoomHimName, nameChat);
+
+            firebaseDatabase.getReference().updateChildren(roomName, new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                    Log.d(TAG, databaseError == null ? "setNameChat true": "setNameChat databaseError: "+ databaseError);
+                }
+            });
+        }
+    }
+
+
     public void hot() {
 
         Log.d(TAG, "isHot: " + hot);
@@ -392,52 +426,5 @@ public class FirebaseRoom {
             }
         });
     }
-
-
-
-    /*
-    private void listenRandomReceptor(){
-        randomReceptorListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot != null){
-                    Log.d(TAG, "randomReceptorReference dataSnapshot: " + dataSnapshot);
-                    //Receptor receptor = dataSnapshot.getValue(Receptor.class);
-                    Emisor receptor = dataSnapshot.getValue(Emisor.class);
-                    if (!TextUtils.isEmpty(receptor.getKeyDevice()) && !receptor.getKeyDevice().equals(androidID)){
-                        androidIDReceptor = receptor.getKeyDevice();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-
-        randomReceptorReference.addValueEventListener(randomReceptorListener);
-
-    }
-    private void listenRandomEmisor(){
-        randomEmisorListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot != null){
-                    Log.d(TAG, "randomEmisorReference dataSnapshot: " + dataSnapshot);
-                    Emisor emisor = dataSnapshot.getValue(Emisor.class);
-                    if (!TextUtils.isEmpty(emisor.getKeyDevice()) && !emisor.getKeyDevice().equals(androidID)){
-                        androidIDReceptor = emisor.getKeyDevice();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-        randomEmisorReference.addValueEventListener(randomEmisorListener);
-    }*/
 
 }

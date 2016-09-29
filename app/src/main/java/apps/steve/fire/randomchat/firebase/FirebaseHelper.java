@@ -432,9 +432,7 @@ public class FirebaseHelper {
         queryChats.removeEventListener(chatsListener);
     }
 
-    public void removeChat(){
 
-    }
 
     private void listenChats() {
         queryChats = chatsReference.orderByChild("lastMessage/messageTime").limitToFirst(20);

@@ -387,8 +387,9 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(Constants.TAG, "" + item.getTitle());
         switch (item.getItemId()) {
-            case R.id.action_settings:
+            case R.id.action_block:
                 // User chose the "Settings" item, show the app settings UI...
+                firebaseRoom.block();
                 return true;
 
             case R.id.action_hot:

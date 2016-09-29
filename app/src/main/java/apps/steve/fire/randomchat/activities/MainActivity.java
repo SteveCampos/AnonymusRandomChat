@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.wang.avi.AVLoadingIndicatorView;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // Check whether we're recreating a previously destroyed instance
@@ -86,35 +88,55 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         if (getIntent().hasExtra("current_item")) {
             currentItem = getIntent().getIntExtra("current_item", 0);
         }
+
+        androidID = Utils.getAndroidID(this);
+    }
+
+    @Override
+    protected void onRestart() {
+        Log.d(TAG, "onRestart");
+        super.onRestart();
+    }
+
+    @Override
+    protected void onStart() {
+        Log.d(TAG, "onStart");
+        super.onStart();
     }
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "onResume");
         ButterKnife.bind(this);
         initViews();
+        initFirebase();
         super.onResume();
+    }
+
+    private void initFirebase() {
+        Log.d(TAG, "initFirebase");
+        firebaseHelper = new FirebaseHelper(getActivity());
+        firebaseHelper.initChats(androidID, this);
+        firebaseHelper.setOn();
+        //IF USER NOT EXIST, CREATE ONE.
+        createUser();
     }
 
     @Override
     protected void onPause() {
+        Log.d(TAG, "onPause");
         firebaseHelper.removeChatsListener();
         super.onPause();
     }
 
     @Override
     protected void onStop() {
+        Log.d(TAG, "onStop");
         super.onStop();
     }
 
     private void initViews() {
-
-        firebaseHelper = new FirebaseHelper(getActivity());
-
-        androidID = Utils.getAndroidID(this);
-        firebaseHelper.initChats(androidID, this);
-        firebaseHelper.setOn();
-
-
+        Log.d(TAG, "initViews");
         // Adding Toolbar to Main screen
         setSupportActionBar(toolbar);
         // Setting ViewPager for each Tabs
@@ -140,9 +162,6 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         }
         // Set behavior of Navigation drawer
         navigationView.setNavigationItemSelectedListener(this);
-
-        //IF USER NOT EXIST, CREATE ONE.
-        createUser();
     }
 
     private void createUser() {
@@ -177,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     // Add Fragments to Tabs
     private void setupViewPager(ViewPager viewPager) {
+        Log.d(TAG, "setupViewPager");
         adapter = new MyFragmentAdapter(getSupportFragmentManager());
 
         adapter.addFragment(SearchFragment.newInstance(), getString(R.string.title_activity_search_chat));
@@ -208,6 +228,8 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+
+        Log.d(TAG, "onOptionsItemSelected item.getItemId(): " + item.getItemId());
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -222,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        Log.d(TAG, "onNavigationItemSelected item.getItemId(): " + item.getItemId());
         // Set item in checked state
         item.setChecked(true);
         // TODO: handle navigation
@@ -239,6 +262,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     @OnClick(R.id.fab)
     void onFabClick(){
+        Log.d(TAG, "onFabClick");
         startAnim();
 
         int currentItem = viewPager.getCurrentItem();
@@ -282,17 +306,22 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     private List<Fragment>  getFragments(){
         List<Fragment> fragments = getSupportFragmentManager().getFragments();
+        List<Fragment> fragmentsClean = new ArrayList<>();
         if (fragments != null){
             Log.d(TAG, "getSupportFragmentManager().getFragments().size(): "+ fragments.size());
             for (int i= 0; i< fragments.size(); i++){
-
                 Log.d(TAG, "FRAGMENT: " + i );
+                if ((fragments.get(i) instanceof SearchFragment || fragments.get(i) instanceof ChatsFragment))
+                {
+                    fragmentsClean.add(fragments.get(i));
+                }
+                /*
                 if (fragments.get(i)!=  null){
                     Log.d(TAG, "TAG : " + fragments.get(i).getTag());
-                }
+                }*/
             }
         }
-        return fragments;
+        return fragmentsClean;
     }
 
     private ChatsFragment getChatsFragment(){
@@ -321,8 +350,6 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
                 if (fragments.get(2) instanceof ChatsFragment) {
                     Log.d(TAG, "fragments.get(2) instanceof ChatsFragment");
                     return (ChatsFragment) fragments.get(2);
-                } else if (fragments.get(3) instanceof ChatsFragment){
-                    return  (ChatsFragment) fragments.get(3);
                 }else{
                     return null;
                 }
@@ -348,23 +375,24 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     @Override
     public void onChatsHotListener(boolean success, List<RandomChat> chatList) {
-        Log.d(TAG, "onChatChangedListener success: " + success);
+        Log.d(TAG, "onChatsHotListener success: " + success);
 
         ChatsFragment hotsFragment = getHotsFragment();
 
         if (success && hotsFragment != null){
             hotsFragment.setData(chatList);
         }
-
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        Log.d(TAG, "onSaveInstanceState");
         outState.putInt("current_position", currentItem);
         super.onSaveInstanceState(outState);
     }
 
     public void onRestoreInstanceState(Bundle savedInstanceState) {
+        Log.d(TAG, "onRestoreInstanceState");
         // Always call the superclass so it can restore the view hierarchy
         super.onRestoreInstanceState(savedInstanceState);
 
@@ -374,12 +402,13 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     @Override
     protected void onDestroy() {
+        Log.d(TAG, "onCreate");
         firebaseHelper.setOff();
         super.onDestroy();
     }
 
     void startAnim(){
-
+        Log.d(TAG, "startAnim");
         viewPager.setAlpha((float)0.3);
         fab.setEnabled(false);
         avi.setVisibility(View.VISIBLE);
@@ -388,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     void stopAnim(){
-
+        Log.d(TAG, "stopAnim");
         viewPager.setAlpha((float)1);
         fab.setEnabled(true);
         avi.setVisibility(View.GONE);
@@ -398,6 +427,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     @Override
     public void onChatLaunched(String key) {
+        Log.d(TAG, "onChatLaunched key: " + key);
         firebaseHelper.removeChatsListener();
         SearchFragment searchFragment = getSearchFragment();
         if (searchFragment != null) {
@@ -409,6 +439,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     @Override
     public void onFailed(String error) {
+        Log.d(TAG, "onFailed error: " + error);
         SearchFragment searchFragment = getSearchFragment();
         if (searchFragment != null) {
             searchFragment.enabledInputs(true);
@@ -418,6 +449,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     private void launchChatActivity(String key) {
+        Log.d(TAG, "launchChatActivity key: " + key);
         // first parameter is the context, second is the class of the activity to launch
         Intent i = new Intent(getActivity(), ChatActivity.class);
         // put "extras" into the bundle for access in the second activity

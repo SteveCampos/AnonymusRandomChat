@@ -23,6 +23,8 @@ public class Constants {
 
 
 
+
+
     public static final String _HERE = "_CREATED_HERE";
     public static final String _PARED = "_PARED_HERE";
     public static final String _NOTIFICATION = "NOTIFICATION_OPENED";
@@ -49,6 +51,7 @@ public class Constants {
     public static final String CHAT_STATE_NO_ACTION = "NO_ACTION";
     public static final String CHAT_STATE_PARED = "PARED";
     public static final String CHAT_STATE_WAITING = "WAITING";
+    public static final String CHAT_STATE_BLOCK = "BLOCK";
 
 
 

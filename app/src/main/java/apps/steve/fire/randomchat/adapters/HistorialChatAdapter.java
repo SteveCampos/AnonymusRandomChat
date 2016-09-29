@@ -142,13 +142,10 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
             Drawable drawable = ContextCompat.getDrawable(mContext, drawableID);
 
             holder.message.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
-
-            if (item.getNoReaded() > 0) {
-                counterMessage = ""+item.getNoReaded();
-                holder.counter.setBackgroundResource(R.drawable.badge_circle);
-                holder.time.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
-            }
         }
+
+
+
 
         if (item.isHot()){
             Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_whatshot_red_24dp);
@@ -159,6 +156,12 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
         if (interlocutor == null){
             counterMessage = mContext.getString(R.string.chat_state_waiting);
             counterColor = ContextCompat.getColor(mContext, R.color.vimeo_blue);
+        }else{
+            if (item.getNoReaded() > 0) {
+                counterMessage = ""+item.getNoReaded();
+                holder.counter.setBackgroundResource(R.drawable.badge_circle);
+                holder.time.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
+            }
         }
 
 
