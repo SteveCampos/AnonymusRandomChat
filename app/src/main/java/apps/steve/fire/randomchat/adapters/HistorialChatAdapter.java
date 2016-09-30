@@ -14,8 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.ads.AdListener;
 import com.like.LikeButton;
 import com.like.OnLikeListener;
 
@@ -27,6 +29,8 @@ import apps.steve.fire.randomchat.Historial;
 import apps.steve.fire.randomchat.R;
 import apps.steve.fire.randomchat.Utils;
 import apps.steve.fire.randomchat.holders.ChatsHolder;
+import apps.steve.fire.randomchat.holders.NativeAdViewHolder;
+import apps.steve.fire.randomchat.interfaces.OnChatItemClickListener;
 import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.model.HistorialChat;
 import apps.steve.fire.randomchat.model.RandomChat;
@@ -37,22 +41,21 @@ import static apps.steve.fire.randomchat.Constants.Genero.CHICO;
  * Created by Steve on 14/07/2016.
  */
 
-public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
+public class HistorialChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     //https://cinegaygratis.blogspot.pe/2015/07/un-chant-d-amour.html
 
     private static final String TAG = HistorialChatAdapter.class.getSimpleName();
 
-    public interface OnStartChatListener {
-        void onStartChat(RandomChat item, View view, boolean liked);
-    }
+    private static final int CHAT_VIEW_TYPE = 1;
+    private static final int NATIVE_AD_VIEW_TYPE = 2;
 
-    private final OnStartChatListener listener;
+    private final OnChatItemClickListener listener;
     // Store a member variable for the contacts
     private List<RandomChat> mHistorial;
     private Context mContext;
     String androidID;
 
-    public HistorialChatAdapter(List<RandomChat> mHistorial, Context mContext, String androidID, OnStartChatListener listener) {
+    public HistorialChatAdapter(List<RandomChat> mHistorial, Context mContext, String androidID, OnChatItemClickListener listener) {
         this.mHistorial = mHistorial;
         this.mContext = mContext;
         this.listener = listener;
@@ -63,121 +66,88 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
     // Usually involves inflating a layout from XML and returning the holder
     //
     @Override
-    public ChatsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        // Inflate the custom layout
-        View contactView = inflater.inflate(R.layout.item_historial_chat, parent, false);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // Return a new holder instance
-        return new ChatsHolder(contactView);
-    }
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        RecyclerView.ViewHolder viewHolder = null;
 
+        switch (viewType) {
+            case CHAT_VIEW_TYPE:
+                View v1 = inflater.inflate(R.layout.item_historial_chat, parent, false);
+                viewHolder = new ChatsHolder(v1);
+                break;
+            case NATIVE_AD_VIEW_TYPE:
+                View v2 = inflater.inflate(R.layout.list_item_native_ad, parent, false);
+                viewHolder = new NativeAdViewHolder(v2);
+                break;
+        }
+        return viewHolder;
+    }
     public void setData(List<RandomChat> mHistorial) {
         this.mHistorial = mHistorial;
         notifyDataSetChanged();
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        if (position >1 && position % 3 == 0) {
+            return NATIVE_AD_VIEW_TYPE;
+        }
+
+        return CHAT_VIEW_TYPE;
+    }
 
     // Involves populating data into the item through holder
     @Override
-    public void onBindViewHolder(ChatsHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 
         final RandomChat item = mHistorial.get(position);
 
-        holder.time.setText(Utils.calculateLastConnection(new Date(Utils.abs(item.getLastMessage().getMessageTime())), new Date(), mContext));
-
-
-        Emisor me = item.getEmisor();
-        Emisor interlocutor = item.getReceptor();
-        if (!item.getEmisor().getKeyDevice().equals(androidID)){
-            me = item.getReceptor();
-            interlocutor = item.getEmisor();
-        }
-
-        int idAvatar = R.drawable.boy_1;
-        String title = "";
-        String message = "";
-        String counterMessage = "";
-        int counterColor = ContextCompat.getColor(mContext, R.color.white);
-
-
-
-        String interlocutorGenero = me.getLooking().getGenero();
-
-        //AVATAR, AND GENDER
-
-        switch (Constants.Genero.valueOf(interlocutorGenero)) {
-            case CHICA:
-                idAvatar = R.drawable.girl_2;
-                title = mContext.getString(R.string.girl);
+        switch (holder.getItemViewType()) {
+            case CHAT_VIEW_TYPE:
+                ChatsHolder vh1 = (ChatsHolder) holder;
+                vh1.bind(item, androidID, mContext, new OnChatItemClickListener() {
+                    @Override
+                    public void onChatItemClicked(RandomChat item, View view, boolean liked) {
+                        listener.onChatItemClicked(item, view, liked);
+                    }
+                });
                 break;
-            case CHICO:
-                idAvatar = R.drawable.boy_1;
-                title = mContext.getString(R.string.boy);
+            case NATIVE_AD_VIEW_TYPE:
+                NativeAdViewHolder vh2 = (NativeAdViewHolder) holder;
+                vh2.bind(new AdListener() {
+                    @Override
+                    public void onAdClosed() {
+                        super.onAdClosed();
+                        Toast.makeText(mContext, "onAdClosed", Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(int i) {
+                        super.onAdFailedToLoad(i);
+                        Toast.makeText(mContext, "onAdFailedToLoad", Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onAdLeftApplication() {
+                        super.onAdLeftApplication();
+                        Toast.makeText(mContext, "onAdLeftApplication", Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onAdOpened() {
+                        super.onAdOpened();
+                        Toast.makeText(mContext, "onAdOpened", Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onAdLoaded() {
+                        super.onAdLoaded();
+                        Toast.makeText(mContext, "onAdLoaded", Toast.LENGTH_LONG).show();
+                    }
+                });
                 break;
         }
-
-        if (!TextUtils.isEmpty(item.getHimName())){
-            title = item.getHimName();
-        }
-
-
-        message = item.getLastMessage().getMessageText();
-
-        if (item.getLastMessage().getAndroidID().equals(me.getKeyDevice())) {
-
-            int drawableID =  R.drawable.ic_double_check;
-
-            switch (item.getLastMessage().getMessageStatus()) {
-                case Constants.READED:
-                    drawableID = R.drawable.ic_double_check_colored;
-                    break;
-                case Constants.DELIVERED:
-                    drawableID = R.drawable.ic_double_check;
-                    break;
-                case Constants.SENT:
-                    drawableID = R.drawable.ic_check;
-                    break;
-            }
-
-            Drawable drawable = ContextCompat.getDrawable(mContext, drawableID);
-
-            holder.message.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
-        }
-
-
-
-
-        if (item.isHot()){
-            Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_whatshot_red_24dp);
-            holder.time.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
-        }
-
-
-        if (interlocutor == null){
-            counterMessage = mContext.getString(R.string.chat_state_waiting);
-            counterColor = ContextCompat.getColor(mContext, R.color.vimeo_blue);
-        }else{
-            if (item.getNoReaded() > 0) {
-                counterMessage = ""+item.getNoReaded();
-                holder.counter.setBackgroundResource(R.drawable.badge_circle);
-                holder.time.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
-            }
-        }
-
-
-
-        Glide.with(mContext)
-                .load(idAvatar)
-                .placeholder(idAvatar)
-                .into(holder.imageView);
-
-        holder.title.setText(title);
-
-        holder.message.setText(message);
-
-        holder.counter.setText(counterMessage);
-        holder.counter.setTextColor(counterColor);
-
 
 
 
@@ -187,11 +157,12 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
             holder.title.setText("!item.getMe().getKeyDevice().equals(androidID)");
         }*/
 
+        /*
         Log.d(TAG, "androidID: " + androidID);
         Log.d(TAG, "item.getLastMessage().getAndroidID(): " + item.getLastMessage().getAndroidID());
 
 
-        Log.d(TAG, "item.getLastMessage().getAndroidID().equals(androidID): " + item.getLastMessage().getAndroidID().equals(androidID));
+        Log.d(TAG, "item.getLastMessage().getAndroidID().equals(androidID): " + item.getLastMessage().getAndroidID().equals(androidID));*/
 
 
         /*buttonLike.setLiked(item.isLike());
@@ -199,12 +170,17 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<ChatsHolder> {
         buttonStar.setLiked(item.isStar());*/
 
 
+
+
+        /*
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 listener.onStartChat(item, v, true);
             }
         });
+        */
+
         /*
         buttonChat.setOnClickListener(new View.OnClickListener() {
             @Override

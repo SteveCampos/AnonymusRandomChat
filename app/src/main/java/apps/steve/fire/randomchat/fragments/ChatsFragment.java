@@ -22,6 +22,7 @@ import apps.steve.fire.randomchat.R;
 import apps.steve.fire.randomchat.Utils;
 import apps.steve.fire.randomchat.adapters.HistorialChatAdapter;
 import apps.steve.fire.randomchat.firebase.FirebaseChats;
+import apps.steve.fire.randomchat.interfaces.OnChatItemClickListener;
 import apps.steve.fire.randomchat.interfaces.OnChatsListener;
 import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.model.HistorialChat;
@@ -32,7 +33,7 @@ import butterknife.ButterKnife;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ChatsFragment extends Fragment implements HistorialChatAdapter.OnStartChatListener{
+public class ChatsFragment extends Fragment implements OnChatItemClickListener {
 
 
     @BindView(R.id.my_recycler_view)
@@ -67,7 +68,7 @@ public class ChatsFragment extends Fragment implements HistorialChatAdapter.OnSt
 
     private void setRecyclerView(String androidID){
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        adapter = new HistorialChatAdapter(null, getActivity(),androidID , this);
+        adapter = new HistorialChatAdapter(null, getActivity(), androidID , this);
         recyclerView.setAdapter(adapter);
     }
 
@@ -77,11 +78,6 @@ public class ChatsFragment extends Fragment implements HistorialChatAdapter.OnSt
         }
     }
 
-    @Override
-    public void onStartChat(RandomChat item, View view, boolean liked) {
-        //Snackbar.make(recyclerView, item.getEmisor().getGenero(), Snackbar.LENGTH_LONG).show();
-        launchChatActivity(item, Constants._HERE);
-    }
 
     private void launchChatActivity(RandomChat item, String start_type) {
         // first parameter is the context, second is the class of the activity to launch
@@ -95,4 +91,8 @@ public class ChatsFragment extends Fragment implements HistorialChatAdapter.OnSt
         startActivity(i);
     }
 
+    @Override
+    public void onChatItemClicked(RandomChat item, View view, boolean liked) {
+        launchChatActivity(item, Constants._HERE);
+    }
 }

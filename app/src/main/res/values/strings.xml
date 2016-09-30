@@ -65,5 +65,7 @@
     <!-- TODO: Remove or change this placeholder text -->
 
     <string name="banner_top_ad_unit_id">ca-app-pub-7677000963765033/9663714103</string>
+    <string name="native_list_ad_unit_id">ca-app-pub-7677000963765033/2602838508</string>
+
 
 </resources>

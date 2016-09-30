@@ -275,7 +275,7 @@ public class FirebaseRoom {
         });
     }
 
-    public void setNameChat(String nameChat){
+    public void changeName(String nameChat){
         if (me != null){
             Map<String, Object> roomName = new HashMap<>();
             String meRoomHimName = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key + "/" + "himName" + "/";

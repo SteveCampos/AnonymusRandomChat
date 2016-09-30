@@ -24,10 +24,11 @@ import java.util.List;
 import java.util.Map;
 
 import apps.steve.fire.randomchat.adapters.HistorialChatAdapter;
+import apps.steve.fire.randomchat.interfaces.OnChatItemClickListener;
 import apps.steve.fire.randomchat.model.HistorialChat;
 import apps.steve.fire.randomchat.model.RandomChat;
 
-public class Historial extends AppCompatActivity implements HistorialChatAdapter.OnStartChatListener {
+public class Historial extends AppCompatActivity implements OnChatItemClickListener {
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference   historialReference;
@@ -93,30 +94,6 @@ public class Historial extends AppCompatActivity implements HistorialChatAdapter
         //recyclerView.setAdapter(historialChatAdapter);
     }
 
-    @Override
-    public void onStartChat(RandomChat item, View view, boolean liked) {
-
-
-        switch (view.getId()){
-            case R.id.card_historial:
-                launchChatActivity(item, Constants._HERE);
-                break;
-            case R.id.btn_chat:
-                launchChatActivity(item, Constants._HERE);
-                break;
-            /*
-            case R.id.hot_button:
-                updateLikedStatus(item, "hot", liked, view, item.getEmisor().getGenero());
-                break;
-            case R.id.star_button:
-                updateLikedStatus(item, "star", liked, view, item.getEmisor().getGenero());
-                break;
-            case R.id.like_button:
-                updateLikedStatus(item, "like", liked, view, item.getEmisor().getGenero());
-                break;*/
-        }
-
-    }
 
     private void updateLikedStatus(HistorialChat item, final String typeLiked, final boolean state, final View view, final String gender){
 
@@ -172,5 +149,10 @@ public class Historial extends AppCompatActivity implements HistorialChatAdapter
         i.putExtra("start_type", start_type);
         // brings up the second activity
         startActivity(i);
+    }
+
+    @Override
+    public void onChatItemClicked(RandomChat item, View view, boolean liked) {
+        launchChatActivity(item, Constants._HERE);
     }
 }
