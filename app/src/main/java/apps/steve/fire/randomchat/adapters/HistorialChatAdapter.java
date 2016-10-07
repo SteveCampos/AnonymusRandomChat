@@ -90,7 +90,7 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     @Override
     public int getItemViewType(int position) {
-        if (position >1 && position % 3 == 0) {
+        if (position == 1) {
             return NATIVE_AD_VIEW_TYPE;
         }
 
