@@ -18,6 +18,7 @@ import apps.steve.fire.randomchat.Constants;
 import apps.steve.fire.randomchat.R;
 import apps.steve.fire.randomchat.Utils;
 import apps.steve.fire.randomchat.interfaces.OnChatItemClickListener;
+import apps.steve.fire.randomchat.model.Country;
 import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.model.RandomChat;
 import butterknife.BindView;
@@ -140,6 +141,9 @@ public class ChatsHolder extends RecyclerView.ViewHolder {
                 .into(imageView);
 
         textTitle.setText(title);
+        Country country = new Country(mContext, item.getCountry().getCountryID());
+        Drawable drawable = ContextCompat.getDrawable(mContext, country.getDrawableID());
+        textTitle.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
 
         lastMessage.setText(message);
 

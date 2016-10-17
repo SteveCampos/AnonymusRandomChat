@@ -67,8 +67,8 @@ public class CountryAutocompleteAdapter extends ArrayAdapter<Country> implements
         textViewCountry.setTextColor(ContextCompat.getColor(getContext(), R.color.blue_grey_900));
 
         Glide.with(getContext())
-                .load(country.getDrawable())
-                .placeholder(country.getDrawable())
+                .load(country.getDrawableID())
+                .placeholder(country.getDrawableID())
                 .into(imageView);
 
         return row;

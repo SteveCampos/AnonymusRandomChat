@@ -42,7 +42,6 @@ import static apps.steve.fire.randomchat.Constants.Genero.CHICO;
  */
 
 public class HistorialChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    //https://cinegaygratis.blogspot.pe/2015/07/un-chant-d-amour.html
 
     private static final String TAG = HistorialChatAdapter.class.getSimpleName();
 

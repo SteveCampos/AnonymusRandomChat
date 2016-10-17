@@ -46,6 +46,7 @@ import apps.steve.fire.randomchat.firebase.FirebaseRoom;
 import apps.steve.fire.randomchat.interfaces.OnRoomListener;
 import apps.steve.fire.randomchat.model.ChatMessage;
 import apps.steve.fire.randomchat.model.Chater;
+import apps.steve.fire.randomchat.model.Country;
 import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.widgets.Emoji;
 import apps.steve.fire.randomchat.widgets.EmojiView;
@@ -116,7 +117,9 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         androidID = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
         String key_random = getIntent().getStringExtra("key_random");
-        firebaseRoom = new FirebaseRoom(key_random, androidID, this);
+        int countryId = getIntent().getIntExtra("country_id", Country.ESPANA);
+
+        firebaseRoom = new FirebaseRoom(countryId, key_random, androidID, this);
     }
 
     private void initViews() {

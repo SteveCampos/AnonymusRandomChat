@@ -9,6 +9,7 @@ public class Constants {
     public static final String URL_APP_FIRECHAT = "https://chatsteve.firebaseio.com/random";
     public static final String CHILD_MESSAGES = "messages";
     public static final String CHILD_RANDOMS = "randoms";
+    public static final String CHILD_COUNTRIES = "countries";
 
     public static final String CHILD_NOTIFICATIONS = "notification";
     public static final String CHILD_USERS = "users";

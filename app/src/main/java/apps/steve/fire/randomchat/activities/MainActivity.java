@@ -234,9 +234,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
                 .findViewById(R.id.search_src_text);
 
         List<Country> countries = new ArrayList<>();
-        countries.add(new Country(R.drawable.ic_peru, getString(R.string.country_peru), "PERU"));
-        countries.add(new Country(R.drawable.ic_australia, getString(R.string.country_alemania), "ALEMANIA"));
-        countries.add(new Country(R.drawable.ic_australia, getString(R.string.country_australia), "AUSTRALIA"));
+        countries.add(new Country(getActivity(), Country.AUSTRALIA));
 
 
 
@@ -625,7 +623,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     @Override
-    public void onChatLaunched(String key) {
+    public void onChatLaunched(int countryId, String key) {
         Log.d(TAG, "onChatLaunched key: " + key);
         firebaseHelper.removeChatsListener();
         SearchFragment searchFragment = getSearchFragment();
@@ -633,7 +631,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
             searchFragment.enabledInputs(true);
         }
         stopAnim();
-        launchChatActivity(key);
+        launchChatActivity(countryId, key);
     }
 
     @Override
@@ -647,11 +645,22 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         stopAnim();
     }
 
-    private void launchChatActivity(String key) {
+    @Override
+    public void onNotCountrySelected() {
+        SearchFragment searchFragment = getSearchFragment();
+        if (searchFragment != null) {
+            searchFragment.enabledInputs(true);
+        }
+        Snackbar.make(toolbar, "onNotCountrySelected", Snackbar.LENGTH_LONG).show();
+        stopAnim();
+    }
+
+    private void launchChatActivity(int countryId, String key) {
         Log.d(TAG, "launchChatActivity key: " + key);
         // first parameter is the context, second is the class of the activity to launch
         Intent i = new Intent(getActivity(), ChatActivity.class);
         // put "extras" into the bundle for access in the second activity
+        i.putExtra("country_id", countryId);
         i.putExtra("key_random", key);
         startActivity(i);
     }
@@ -702,6 +711,8 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         Snackbar.make(toolbar, country.getName(), Snackbar.LENGTH_LONG).show();
 
         toolbar.setTitle(country.getName());
+
+        firebaseHelper.setCountry(country);
 
 /*        PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
                 .getPlaceById(mGoogleApiClient, placeId);

@@ -7,6 +7,7 @@ import apps.steve.fire.randomchat.model.Emisor;
  */
 
 public interface OnSearchListener {
-    void onChatLaunched(String key);
+    void onChatLaunched(int countryId, String key);
     void onFailed(String error);
+    void onNotCountrySelected();
 }

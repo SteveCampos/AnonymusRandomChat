@@ -67,6 +67,8 @@
         <item>Francia</item>
     </string-array>
 
+    <!--LIST OF ALL COUNTRYIES -->
+    <string name="country_belgica">Bélgica</string>
     <string name="country_peru">Peru</string>
     <string name="country_espana">España</string>
     <string name="country_alemania">Alemania</string>

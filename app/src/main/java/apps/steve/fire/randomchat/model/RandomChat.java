@@ -28,6 +28,7 @@ public class RandomChat {
     private Emisor emisor;
     private Emisor receptor;
     private String estado;
+    private String search;
     //private int userNumber;
     private String action;
     private long time;
@@ -40,6 +41,7 @@ public class RandomChat {
     private int noReaded;
 
     private String himName;
+    private Country country;
 
     public RandomChat() {
 
@@ -133,6 +135,22 @@ public class RandomChat {
         this.himName = himName;
     }
 
+    public Country getCountry() {
+        return country;
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+    }
+
+    public String getSearch() {
+        return search;
+    }
+
+    public void setSearch(String search) {
+        this.search = search;
+    }
+
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
@@ -141,9 +159,11 @@ public class RandomChat {
             result.put("receptor", receptor.toMap());
         }
         result.put("estado", estado);
+        result.put("search", search);
         result.put("action", action);
         result.put("time", time);
         result.put("messages", messages);
+        result.put("country", country.toMap());
         return result;
     }
 
@@ -155,9 +175,11 @@ public class RandomChat {
             result.put("receptor", receptor.toMap());
         }
         result.put("estado", estado);
+        result.put("search", search);
         result.put("action", action);
         result.put("time", time);
         result.put("messages", messages);
+        result.put("country", country.toMap());
         result.put("keyChat", keyChat);
         result.put("hot", hot);
         result.put("lastMessage", lastMessage.toMap());

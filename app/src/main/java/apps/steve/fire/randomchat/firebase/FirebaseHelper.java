@@ -24,6 +24,7 @@ import apps.steve.fire.randomchat.interfaces.OnChatsListener;
 import apps.steve.fire.randomchat.interfaces.OnSearchListener;
 import apps.steve.fire.randomchat.model.ChatMessage;
 import apps.steve.fire.randomchat.model.Connection;
+import apps.steve.fire.randomchat.model.Country;
 import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.model.HistorialChat;
 import apps.steve.fire.randomchat.model.RandomChat;
@@ -41,9 +42,10 @@ public class FirebaseHelper {
 
 
     private DatabaseReference refRandoms;
+    private DatabaseReference refWaiting;
     private DatabaseReference refUsers;
-    private DatabaseReference chatsReference;
-
+    private DatabaseReference refUserChats;
+    private DatabaseReference refCountries;
 
     private OnSearchListener listener;
 
@@ -61,6 +63,8 @@ public class FirebaseHelper {
     private Query queryChats;
     private Query queryChatsHot;
 
+    private Country country;
+
     private static boolean isPersisted = false;
 
     public FirebaseHelper(Context context) {
@@ -69,14 +73,25 @@ public class FirebaseHelper {
             isPersisted = true;
         }
         this.firebaseDatabase = FirebaseDatabase.getInstance();
-        this.refRandoms = firebaseDatabase.getReference(Constants.CHILD_RANDOMS);
+        this.refCountries = firebaseDatabase.getReference(Constants.CHILD_COUNTRIES);
         this.refUsers = firebaseDatabase.getReference(Constants.CHILD_USERS);
         this.context = context;
 
         //PERSISTENCE ENABLED
-        refRandoms.keepSynced(false);
         refUsers.keepSynced(false);
 
+    }
+
+    public Country getCountry() {
+        return country;
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+        this.refRandoms = refCountries.child(country.getNameID()).child(Constants.CHILD_RANDOMS);
+        this.refWaiting = refRandoms.child(Constants.CHAT_STATE_WAITING);
+        //refRandoms.keepSynced(false);
+        refWaiting.keepSynced(true);
     }
 
     public void createUser(String id, User user) {
@@ -100,22 +115,32 @@ public class FirebaseHelper {
         });
     }
 
+
+
     //SEARCH CHAT
 
     public void startChat(OnSearchListener listener) {
         this.listener = listener;
+        if (country==null){
+            listener.onNotCountrySelected();
+            return;
+        }
         Emisor me = Utils.getEmisor(context);
         readNodeRandoms(me);
     }
 
     public void removeListenerRead(){
-        refRandoms.removeEventListener(nodeRandoms);
+        //refRandoms.removeEventListener(nodeRandoms);
     }
 
     private void readNodeRandoms(final Emisor me) {
 
         Log.d(TAG, "readNodeRandoms...");
-        Query queryRandoms = refRandoms.orderByChild("estado").equalTo(RandomChat.WAITING);
+        //Query queryRandoms = refRandoms.orderByChild("estado").equalTo(RandomChat.WAITING);
+
+        //Query queryRandoms = refRandoms.orderByChild("estado").equalTo(RandomChat.WAITING);
+
+        Query queryWaiting = refWaiting.orderByChild("search").equalTo(me.getLooking().getGenero()+"_LOOKING_"+me.getGenero());
 
         //YO SOY EL RECEPTOR
         /*
@@ -202,14 +227,14 @@ public class FirebaseHelper {
             }
         };
 
-        queryRandoms.addListenerForSingleValueEvent(nodeRandoms);
+        queryWaiting.addListenerForSingleValueEvent(nodeRandoms);
     }
 
     private void createNewChat(final Emisor me) {
         Log.d(TAG, "createNewChat ...");
         String keyChat = "";
 
-        keyChat = refRandoms.push().getKey();
+        keyChat = refWaiting.push().getKey();
 
         RandomChat chatRandom = new RandomChat();
         /*
@@ -226,6 +251,7 @@ public class FirebaseHelper {
         chatRandom.setEmisor(me);
         chatRandom.setReceptor(receptor);
         chatRandom.setEstado(RandomChat.WAITING);
+        chatRandom.setSearch(me.getGenero()+"_LOOKING_"+me.getLooking().getGenero());
         chatRandom.setAction(Constants.CHAT_STATE_NO_ACTION);
         chatRandom.setTime(new Date().getTime());
 
@@ -233,16 +259,20 @@ public class FirebaseHelper {
         chatRandom.setNoReaded(0);
         chatRandom.setHot(false);
         chatRandom.setLastMessage(ChatMessage.getDefaultMessage());
+        chatRandom.setCountry(country);
 
         Log.d(TAG, "KEY CHAT : " + keyChat);
 
 
         String pathToHisto = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + keyChat;
-        String pathToRandom = "/" + Constants.CHILD_RANDOMS + "/"+ keyChat;
+        String pathToWaiting = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_WAITING + "/" + keyChat;
+        String pathToPared = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_PARED + "/" + keyChat;
+
 
         Map<String, Object> chat = new HashMap<>();
 
-        chat.put(pathToRandom, chatRandom.toMap());
+        chat.put(pathToWaiting, chatRandom.toMap());
+        chat.put(pathToPared, chatRandom.toMap());
         chat.put(pathToHisto, chatRandom.toHistoMap());
 
         /*
@@ -290,7 +320,7 @@ public class FirebaseHelper {
                     listener.onFailed(databaseError.getMessage());
                 } else {
                     Log.d(TAG, "createNewChat SUCCESS: " + true);
-                    listener.onChatLaunched(finalKeyChat);
+                    listener.onChatLaunched(country.getCountryID(), finalKeyChat);
                 }
             }
         });
@@ -307,13 +337,20 @@ public class FirebaseHelper {
     private void paredChat(final String key, final Emisor me, final Emisor emisor) {
         Log.d(TAG, "paredChat ...");
         Log.d(TAG, "key: " + key);
-        DatabaseReference estadoKey = refRandoms.child(key).child("estado");
+        //DatabaseReference estadoKey = refRandoms.child(key).child("estado");
+
+        DatabaseReference estadoKey = refWaiting.child(key).child("estado");
+
         estadoKey.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "DataSnapshot : " + dataSnapshot.getValue());
-                if (dataSnapshot.getValue().equals(RandomChat.WAITING)) {
-                    updateReceptor(key, RandomChat.PARED, me, emisor);
+
+                Log.d(TAG, "refWaiting.child(key).child(\"estado\") DataSnapshot : " + dataSnapshot);
+
+                if (dataSnapshot != null){
+                    if (dataSnapshot.getValue().equals(RandomChat.WAITING)) {
+                        updateReceptor(key, RandomChat.PARED, me, emisor);
+                    }
                 } else {
                     //YA NO ESTÁ ESPERANDO ALGÚN PUTITO SE EMPAREJÓ JUSTO ANTES QUE YO. CARAJO
                     Log.d(TAG, "ALGÚN PUTITO, SE EMPAREJÓ MILISEGUNDOS ANTES QUE YO : " + true);
@@ -335,10 +372,13 @@ public class FirebaseHelper {
         Log.d(TAG, "key: " + keyChat);
         Log.d(TAG, "state: " + state);
 
-        String pathToRandom = "/" + Constants.CHILD_RANDOMS + "/"+ keyChat;
+        //String pathToRandom = "/" + Constants.CHILD_RANDOMS + "/"+ keyChat;
+
+        String pathToWaiting = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_WAITING + "/" + keyChat;
+        String pathToPared = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_PARED + "/" + keyChat;
+
         String pathToHistoEmisor = "/" + Constants.CHILD_USERS + "/" + emisor.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + keyChat;
         String pathToHistoMe = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + keyChat;
-
 
         //SIGUE ESPERANDO EMPAREJAR YA!!!!!!
 
@@ -357,9 +397,11 @@ public class FirebaseHelper {
         nodeRandom.setHot(false);
         nodeRandom.setLastMessage(ChatMessage.getDefaultMessage());
         nodeRandom.setNoReaded(0);
+        nodeRandom.setCountry(country);
 
 
-        updateNodes.put(pathToRandom, nodeRandom.toMap());
+        updateNodes.put(pathToWaiting, null);
+        updateNodes.put(pathToPared, nodeRandom.toMap());
         updateNodes.put(pathToHistoEmisor, nodeRandom.toHistoMap());
         updateNodes.put(pathToHistoMe, nodeRandom.toHistoMap());
 
@@ -376,7 +418,7 @@ public class FirebaseHelper {
                 } else {
 
                     //ON SUCCESS.
-                    listener.onChatLaunched(keyChat);
+                    listener.onChatLaunched(country.getCountryID(), keyChat);
 
                 }
             }
@@ -387,15 +429,15 @@ public class FirebaseHelper {
     public void initChats(String androidID, OnChatsListener listenerChats) {
 
         this.androidID = androidID;
-        this.chatsReference = firebaseDatabase.getReference(Constants.CHILD_USERS).child(androidID).child(Constants.CHILD_USERS_HISTO_CHATS);
-        chatsReference.keepSynced(true);
+        this.refUserChats = firebaseDatabase.getReference(Constants.CHILD_USERS).child(androidID).child(Constants.CHILD_USERS_HISTO_CHATS);
+        refUserChats.keepSynced(true);
         this.listenerChats = listenerChats;
         listenChats();
         listenChatsHot();
     }
 
     private void listenChatsHot() {
-        queryChatsHot = chatsReference.orderByChild("hot").equalTo(true);
+        queryChatsHot = refUserChats.orderByChild("hot").equalTo(true);
         chatsHotListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -428,14 +470,14 @@ public class FirebaseHelper {
     }
 
     public void removeChatsListener(){
-        //chatsReference.removeEventListener(chatsListener);
+        //refUserChats.removeEventListener(chatsListener);
         queryChats.removeEventListener(chatsListener);
     }
 
 
 
     private void listenChats() {
-        queryChats = chatsReference.orderByChild("lastMessage/messageTime").limitToFirst(20);
+        queryChats = refUserChats.orderByChild("lastMessage/messageTime").limitToFirst(20);
         chatsListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

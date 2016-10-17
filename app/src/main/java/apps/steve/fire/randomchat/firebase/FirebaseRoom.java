@@ -1,5 +1,6 @@
 package apps.steve.fire.randomchat.firebase;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
@@ -18,6 +19,7 @@ import apps.steve.fire.randomchat.Constants;
 import apps.steve.fire.randomchat.interfaces.OnRoomListener;
 import apps.steve.fire.randomchat.model.ChatMessage;
 import apps.steve.fire.randomchat.model.Connection;
+import apps.steve.fire.randomchat.model.Country;
 import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.model.Notification;
 
@@ -75,13 +77,19 @@ public class FirebaseRoom {
 
     private boolean hot = false;
 
+    private Country country;
 
-    public FirebaseRoom(String key, String androidID, OnRoomListener listener) {
+
+    public FirebaseRoom(int countryId, String key, String androidID, Context context) {
+
         this.key = key;
         this.androidID = androidID;
-        this.listener = listener;
+        this.listener = (OnRoomListener) context;
         this.firebaseDatabase = FirebaseDatabase.getInstance();
-        this.roomReference = firebaseDatabase.getReference(Constants.CHILD_RANDOMS).child(key);
+        //this.roomReference = firebaseDatabase.getReference(Constants.CHILD_RANDOMS).child(key);
+        country = new Country(context, countryId);
+
+        this.roomReference = firebaseDatabase.getReference(Constants.CHILD_COUNTRIES).child(country.getNameID()).child(Constants.CHILD_RANDOMS).child(Constants.CHAT_STATE_PARED).child(key);
 
         this.messagesReference = roomReference.child(Constants.CHILD_MESSAGES);
         this.userReference = firebaseDatabase.getReference(Constants.CHILD_USERS);
@@ -177,7 +185,8 @@ public class FirebaseRoom {
     public void sendMessage(final ChatMessage message) {
 
         String keyMessage = messagesReference.push().getKey();
-        String messagePath = "/" + Constants.CHILD_RANDOMS + "/" + key + "/" + Constants.CHILD_MESSAGES + "/" + keyMessage;
+        //String messagePath = "/" + Constants.CHILD_RANDOMS + "/" + key + "/" + Constants.CHILD_MESSAGES + "/" + keyMessage;
+        String messagePath = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_PARED + "/" + key + "/" + Constants.CHILD_MESSAGES + "/" + keyMessage;
 
 
         Map<String, Object> messagePost = new HashMap<>();
@@ -416,7 +425,9 @@ public class FirebaseRoom {
                 if (dataSnapshot != null) {
                     Log.d(TAG, "listenReceptorConnection dataSnapshot: " + dataSnapshot);
                     himConnection = dataSnapshot.getValue(Connection.class);
-                    listener.onReceptorConnectionChanged(himConnection.getState(), himConnection.getLastConnection());
+                    if (himConnection!=null){
+                        listener.onReceptorConnectionChanged(himConnection.getState(), himConnection.getLastConnection());
+                    }
                 }
             }
 

@@ -84,6 +84,7 @@ public class ChatsFragment extends Fragment implements OnChatItemClickListener {
         Intent i = new Intent(getActivity(), ChatActivity.class);
         // put "extras" into the bundle for access in the second activity
         i.putExtra("key_random", item.getKeyChat());
+        i.putExtra("country_id", item.getCountry().getCountryID());
         /*i.putExtra("start_type", start_type);
         i.putExtra("android_id", historialChat.getMe().getKeyDevice());
         i.putExtra("android_id_receptor", historialChat.getEmisor().getKeyDevice());*/
