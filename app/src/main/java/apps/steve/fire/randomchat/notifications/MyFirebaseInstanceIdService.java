@@ -6,6 +6,8 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import apps.steve.fire.randomchat.Utils;
+
 /**
  * Created by Steve on 7/07/2016.
  */
@@ -26,8 +28,11 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         String token = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "FCM Token: " + token);
 
+        String topic = "user_" + Utils.getAndroidID(getBaseContext());
+
+        Log.d(TAG, "topic: " + topic);
         // Once a token is generated, we subscribe to topic.
         FirebaseMessaging.getInstance()
-                .subscribeToTopic(FRIENDLY_ENGAGE_TOPIC);
+                .subscribeToTopic(topic);
     }
 }

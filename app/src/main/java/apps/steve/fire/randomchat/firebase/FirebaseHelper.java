@@ -65,12 +65,11 @@ public class FirebaseHelper {
 
     private Country country;
 
-    private static boolean isPersisted = false;
+    //private static boolean isPersisted = false;
 
     public FirebaseHelper(Context context) {
-        if (!isPersisted){
+        if (firebaseDatabase != null){
             FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-            isPersisted = true;
         }
         this.firebaseDatabase = FirebaseDatabase.getInstance();
         this.refCountries = firebaseDatabase.getReference(Constants.CHILD_COUNTRIES);

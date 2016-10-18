@@ -29,6 +29,7 @@ import apps.steve.fire.randomchat.model.HistorialChat;
 import apps.steve.fire.randomchat.model.RandomChat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import me.leolin.shortcutbadger.ShortcutBadger;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -94,6 +95,12 @@ public class ChatsFragment extends Fragment implements OnChatItemClickListener {
 
     @Override
     public void onChatItemClicked(RandomChat item, View view, boolean liked) {
+        updateShortCut(item.getNoReaded());
         launchChatActivity(item, Constants._HERE);
+    }
+    private void updateShortCut(int x){
+        int noReaded = Utils.getNoReaded(getContext());
+        noReaded = noReaded - x;
+        ShortcutBadger.applyCount(getContext(), noReaded > 0 ? noReaded: 0);
     }
 }

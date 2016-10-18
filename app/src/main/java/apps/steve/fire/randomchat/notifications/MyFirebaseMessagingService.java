@@ -4,6 +4,9 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import apps.steve.fire.randomchat.Utils;
+import me.leolin.shortcutbadger.ShortcutBadger;
+
 /**
  * Created by Steve on 7/07/2016.
  */
@@ -43,6 +46,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 remoteMessage.getNotification());
         Log.d(TAG, "FCM Data Message: " + remoteMessage.getData());
         Log.d(TAG, "FCM " + remoteMessage.getNotification().getBody());
+
+
+        int noReaded = Utils.getNoReaded(getApplicationContext());
+        Utils.saveNoReaded(getApplicationContext(), ++noReaded);
+        ShortcutBadger.applyCount(getApplicationContext(), noReaded);
     }
 
 

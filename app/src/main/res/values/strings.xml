@@ -12,6 +12,7 @@
     <string name="chat_state_writing">Escribiendo…</string>
     <string name="chat_state_waiting">Esperando…</string>
     <string name="chat_state_pared">Emparejado</string>
+    <string name="chat_state_blocked">Blockeado</string>
 
     <string name="article_emisor">Yo:</string>
     <string name="article_boy">Él:</string>

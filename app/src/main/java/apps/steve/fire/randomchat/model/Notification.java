@@ -11,21 +11,39 @@ import java.util.Map;
 
 public class Notification {
 
+    private String from;
+    private String to;
     private String body;
-    private String sender;
+
+    private int countryId;
     private String keyRoom;
     private String senderGender;
     private int status;
 
-    public Notification(String body, String sender, String keyRoom, String senderGender, int status) {
+    public Notification(String from, String to, String body, int countryId, String keyRoom, String senderGender, int status) {
+        this.from = from;
+        this.to = to;
         this.body = body;
-        this.sender = sender;
+        this.countryId = countryId;
         this.keyRoom = keyRoom;
         this.senderGender = senderGender;
         this.status = status;
     }
 
-    public Notification() {
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
     }
 
     public String getBody() {
@@ -36,12 +54,12 @@ public class Notification {
         this.body = body;
     }
 
-    public String getSender() {
-        return sender;
+    public int getCountryId() {
+        return countryId;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public void setCountryId(int countryId) {
+        this.countryId = countryId;
     }
 
     public String getKeyRoom() {
@@ -71,8 +89,11 @@ public class Notification {
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
+        result.put("from", from);
+        result.put("to", to);
         result.put("body", body);
-        result.put("sender", sender);
+
+        result.put("countryId", countryId);
         result.put("keyRoom", keyRoom);
         result.put("senderGender", senderGender);
         result.put("status", status);

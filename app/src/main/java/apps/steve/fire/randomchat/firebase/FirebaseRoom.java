@@ -205,7 +205,7 @@ public class FirebaseRoom {
             if (him != null) {
 
                 String toReceptor = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
-                String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + him.getKeyDevice() + "/" + androidID;
+                String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + keyMessage;
 
                 messagePost.put(toReceptor + "/lastMessage", messageValues);
                 List<String> messageNoReaded = calculateMessagesNoReaded();
@@ -216,7 +216,7 @@ public class FirebaseRoom {
                 if (himConnection != null) {
                     if (!himConnection.getState().equals(Constants.STATE_ONLINE)) {
                         String messages = getStringofArray(messageNoReaded);
-                        messagePost.put(notificationPath, new Notification(messages, androidID, key, androidID, Constants.SENT).toMap());
+                        messagePost.put(notificationPath, new Notification(me.getKeyDevice(), him.getKeyDevice(), message.getMessageText(), country.getCountryID(), key, me.getGenero(), Constants.SENT).toMap());
 
                     }
                 }
@@ -263,7 +263,8 @@ public class FirebaseRoom {
 
         Map<String, Object> blockChat = new HashMap<>();
 
-        String roomState = "/" + Constants.CHILD_RANDOMS + "/" + key + "/" + Constants.CHILD_STATE + "/";
+        //String roomState = "/" + Constants.CHILD_RANDOMS + "/" + key + "/" + Constants.CHILD_STATE + "/";
+        String roomState = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_PARED + "/" + key + "/" + Constants.CHILD_STATE + "/";
         blockChat.put(roomState, Constants.CHAT_STATE_BLOCK);
 
         if (me != null){
@@ -279,7 +280,7 @@ public class FirebaseRoom {
         firebaseDatabase.getReference().updateChildren(blockChat, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                Log.d(TAG, databaseError == null ? "deleteChat true": "deleteChat databaseError: "+ databaseError);
+                Log.d(TAG, databaseError == null ? "block": "block databaseError: "+ databaseError);
             }
         });
     }
@@ -369,17 +370,19 @@ public class FirebaseRoom {
 
 
     public void setReaded(List<ChatMessage> messages) {
-        if (me == null || him == null) {
+        if (me == null || him == null || country==null) {
+            Log.d(TAG, "me == null || him == null || country==null");
             return;
         }
 
         messages = getMessageNoReaded(messages);
         if (messages.size() > 0) {
 
-            String messagePath = "/" + Constants.CHILD_RANDOMS + "/" + key + "/" + Constants.CHILD_MESSAGES;//UPDATE MESSAGES STATUS
+            //String messagePath = "/" + Constants.CHILD_RANDOMS + "/" + key + "/" + Constants.CHILD_MESSAGES;//UPDATE MESSAGES STATUS
+            String messagePath = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_PARED + "/" + key + "/" + Constants.CHILD_MESSAGES ;
             String to = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key; //UPDATE COUNT
             String toReceptor = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
-            String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + me.getKeyDevice() + "/" + him.getKeyDevice();
+            //String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + me.getKeyDevice() + "/" + him.getKeyDevice();
 
             Map<String, Object> messageReaded = new HashMap<>();
             for (ChatMessage message : messages) {
@@ -392,8 +395,7 @@ public class FirebaseRoom {
             messageReaded.put(toReceptor + "/lastMessage/messageStatus", Constants.READED);
             messageReaded.put(toReceptor + "/lastMessage/messageTime", new Date().getTime());
 
-
-            messageReaded.put(notificationPath + "/status", Constants.READED);
+//            messageReaded.put(notificationPath + "/status", Constants.READED);
 
             firebaseDatabase.getReference().updateChildren(messageReaded);
 

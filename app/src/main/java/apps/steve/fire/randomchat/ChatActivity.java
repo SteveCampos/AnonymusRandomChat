@@ -631,7 +631,9 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
             lastConnection = getString(R.string.chat_state_waiting);
         } else if (state.equals(Constants.CHAT_STATE_PARED)) {
             lastConnection = getString(R.string.chat_state_pared);
-            Snackbar.make(toolbar, lastConnection, Snackbar.LENGTH_LONG).show();
+            //Snackbar.make(toolbar, lastConnection, Snackbar.LENGTH_LONG).show();
+        } else if(state.equals(Constants.CHAT_STATE_BLOCK)){
+            lastConnection = getString(R.string.chat_state_blocked);
         }
 
         textLastConnection.setText(lastConnection);

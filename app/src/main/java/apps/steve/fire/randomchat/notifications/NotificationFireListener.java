@@ -63,15 +63,17 @@ public class NotificationFireListener extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        /*
         Log.d(TAG, "onCreate");
         database = FirebaseDatabase.getInstance();
         String androidID = Utils.getAndroidID(getApplicationContext());
         refRandoms = database.getReference(Constants.CHILD_NOTIFICATIONS).child(androidID);
-        initializeBubblesManager();
+        initializeBubblesManager();*/
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        /*
         Log.d(TAG, "onStartCommand");
         // FIRE DATABASE INSTANCE
 
@@ -83,7 +85,7 @@ public class NotificationFireListener extends Service {
 
                 apps.steve.fire.randomchat.model.Notification n = dataSnapshot.getValue(apps.steve.fire.randomchat.model.Notification.class);
 
-                Log.d(TAG, "Notification Sender : " + n.getSender());
+                Log.d(TAG, "Notification Sender : " + n.getFrom());
                 Log.d(TAG, "Notification Body : " + n.getBody());
                 notifications.clear();
                 notifications.add(n);
@@ -97,7 +99,7 @@ public class NotificationFireListener extends Service {
                 Log.d(TAG, "onChildAdded dataSnapshot: " + dataSnapshot.toString() + ", s: " + s);
 
                 apps.steve.fire.randomchat.model.Notification n = dataSnapshot.getValue(apps.steve.fire.randomchat.model.Notification.class);
-                Log.d(TAG, "Notification Sender : " + n.getSender());
+                Log.d(TAG, "Notification Sender : " + n.getFrom());
                 Log.d(TAG, "Notification Body : " + n.getBody());
                 notifications.clear();
                 notifications.add(n);
@@ -124,8 +126,8 @@ public class NotificationFireListener extends Service {
 
         refRandoms.addChildEventListener(handler);
 
-        return Service.START_STICKY;
-        //return super.onStartCommand(intent, flags, startId);
+        return Service.START_STICKY;*/
+        return super.onStartCommand(intent, flags, startId);
     }
 
     private void notifyDataSetChanged() {
@@ -165,7 +167,7 @@ public class NotificationFireListener extends Service {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
 
         builder.setSmallIcon(R.drawable.naturesvg);
-        builder.setContentTitle(n.getSender());
+        builder.setContentTitle(n.getFrom());
         builder.setContentText(n.getBody());
 
         Bitmap profilePicture = BitmapFactory.decodeResource(
@@ -175,7 +177,7 @@ public class NotificationFireListener extends Service {
         builder.setLargeIcon(profilePicture);
 
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-        inboxStyle.setBigContentTitle(n.getSender());
+        inboxStyle.setBigContentTitle(n.getFrom());
         String messages = n.getBody();
 
         if (!messages.isEmpty()) {
