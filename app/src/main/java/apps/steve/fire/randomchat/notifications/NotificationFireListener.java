@@ -3,14 +3,18 @@ package apps.steve.fire.randomchat.notifications;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.IBinder;
+import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -53,6 +57,7 @@ public class NotificationFireListener extends Service {
     private List<apps.steve.fire.randomchat.model.Notification> notifications = new ArrayList<>();
     private int count;
 
+    private BroadcastReceiver mNotificationsReceiver;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -63,6 +68,20 @@ public class NotificationFireListener extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        mNotificationsReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "mNotificationsReceiver onReceive");
+                String title = intent.getStringExtra("title");
+                String description = intent.getStringExtra("description");
+                //mPresenter.savePushMessage(title, description, expiryDate, discount);
+                showShorCutBadge();
+            }
+        };
+        LocalBroadcastManager.getInstance(getApplicationContext())
+                .registerReceiver(mNotificationsReceiver, new IntentFilter(MyFirebaseMessagingService.ACTION_NOTIFY_NEW_NOTIFICATION));
+
         /*
         Log.d(TAG, "onCreate");
         database = FirebaseDatabase.getInstance();
@@ -71,10 +90,27 @@ public class NotificationFireListener extends Service {
         initializeBubblesManager();*/
     }
 
+    void showShorCutBadge()
+    {
+
+        /*
+        int noReaded = Utils.getIntFromPref(getApplicationContext(), Constants.PREF_NO_READED);
+        Log.d(TAG, "noReaded: " + noReaded);
+        Utils.saveToPref(getApplicationContext(), Constants.PREF_NO_READED ,++noReaded);
+
+        ShortcutBadger.applyCount(getApplicationContext(), 5);*/
+    }
+
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        /*
+
         Log.d(TAG, "onStartCommand");
+
+        Log.d(TAG, "intent: " + intent);
+
+
+        /*
         // FIRE DATABASE INSTANCE
 
         ChildEventListener handler;
@@ -125,9 +161,9 @@ public class NotificationFireListener extends Service {
         };
 
         refRandoms.addChildEventListener(handler);
-
-        return Service.START_STICKY;*/
         return super.onStartCommand(intent, flags, startId);
+*/
+        return Service.START_STICKY;
     }
 
     private void notifyDataSetChanged() {

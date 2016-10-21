@@ -20,6 +20,9 @@ public class Notification {
     private String senderGender;
     private int status;
 
+    public Notification() {
+    }
+
     public Notification(String from, String to, String body, int countryId, String keyRoom, String senderGender, int status) {
         this.from = from;
         this.to = to;

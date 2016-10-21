@@ -2,7 +2,9 @@ package apps.steve.fire.randomchat.fragments;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -95,12 +97,24 @@ public class ChatsFragment extends Fragment implements OnChatItemClickListener {
 
     @Override
     public void onChatItemClicked(RandomChat item, View view, boolean liked) {
-        updateShortCut(item.getNoReaded());
+        updateShortCut(item);
         launchChatActivity(item, Constants._HERE);
     }
-    private void updateShortCut(int x){
-        int noReaded = Utils.getNoReaded(getContext());
-        noReaded = noReaded - x;
-        ShortcutBadger.applyCount(getContext(), noReaded > 0 ? noReaded: 0);
+    private void updateShortCut(RandomChat item){
+        int x = item.getNoReaded();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences.Editor editor = preferences.edit();
+        int noReaded = preferences.getInt(Constants.PREF_NOTI_COUNT, 0);
+        String lastUserIdNoti = preferences.getString(Constants.PREF_NOTI_USER_ID_LAST, "");
+        noReaded = noReaded > x ? (noReaded - x) : 0;
+        editor.putInt(Constants.PREF_NOTI_COUNT, noReaded);
+
+        if (item.getEmisor().getKeyDevice().equals(lastUserIdNoti) || item.getReceptor().getKeyDevice().equals(lastUserIdNoti)){
+            editor.putString(Constants.PREF_NOTI_MESSAGES, "");
+        }
+
+        editor.apply();
+        ShortcutBadger.applyCount(getContext(), noReaded);
+
     }
 }

@@ -22,7 +22,6 @@ import apps.steve.fire.randomchat.model.Looking;
 public class Utils {
 
     public static final String TAG = Utils.class.getSimpleName();
-
     public static String capitalize(String input){
         return input.substring(0, 1).toUpperCase() + input.substring(1);
     }
@@ -273,14 +272,19 @@ public class Utils {
         return id;
     }
 
-    public static void saveNoReaded(Context context, int count){
-        int noReaded = getNoReaded(context);
-        noReaded += count;
+    public static void saveToPref(Context context, String prefKey, int x){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt("no_readed", noReaded);
+        editor.putInt(prefKey, x);
         editor.apply();
     }
+    public static void saveToPref(Context context, String prefKey, String x){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(prefKey, x);
+        editor.apply();
+    }
+
 
     public static void saveEmisor(Context context, Emisor emisor){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -309,9 +313,18 @@ public class Utils {
         return emisor;
     }
 
-    public static int getNoReaded(Context context){
+    public static int getIntFromPref(Context context, String prefKey){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return preferences.getInt("no_readed", 0);
+        return preferences.getInt(prefKey, 0);
     }
+    /*
+    public static int getStringFromPref(Context context, String prefKey){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return preferences.getInt(prefKey, 0);
+    }*/
+
+
+
+
 
 }

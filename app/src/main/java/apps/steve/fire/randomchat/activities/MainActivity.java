@@ -159,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
             currentItem = getIntent().getIntExtra("current_item", 0);
         }
 
+
         androidID = Utils.getAndroidID(this);
     }
 

@@ -1,5 +1,6 @@
 package apps.steve.fire.randomchat.notifications;
 
+import android.content.Intent;
 import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -34,5 +35,6 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         // Once a token is generated, we subscribe to topic.
         FirebaseMessaging.getInstance()
                 .subscribeToTopic(topic);
+        startService(new Intent(getApplicationContext(), NotificationFireListener.class));
     }
 }

@@ -54,6 +54,14 @@ public class Constants {
     public static final String CHAT_STATE_WAITING = "WAITING";
     public static final String CHAT_STATE_BLOCK = "BLOCK";
 
+    public static final String PREF_NO_READED = "no_readed";
+    public static final String PREF_NOTI_COUNT_FROM = "noti_count_from";
+    public static final String PREF_NOTI_COUNT = "noti_count";
+    public static final String PREF_NOTI_USER_ID_LAST = "noti_user_id_last";
+    public static final String PREF_NOTI_MESSAGES = "noti_messages";
+
+
+
 
 
     //PATHS
