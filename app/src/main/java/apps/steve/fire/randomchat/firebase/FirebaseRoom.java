@@ -113,7 +113,6 @@ public class FirebaseRoom {
     }
 
     private void listenRoom() {
-        listenMessages();
         roomChatterListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -175,10 +174,11 @@ public class FirebaseRoom {
             }
         };
 
-        roomEmisorReference.addListenerForSingleValueEvent(roomChatterListener);
-        roomReceptorReference.addListenerForSingleValueEvent(roomChatterListener);
+        roomEmisorReference.addValueEventListener(roomChatterListener);
+        roomReceptorReference.addValueEventListener(roomChatterListener);
         stateReference.addValueEventListener(stateListener);
         actionReference.addValueEventListener(actionListener);
+        listenMessages();
     }
 
 

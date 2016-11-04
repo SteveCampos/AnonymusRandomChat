@@ -16,6 +16,8 @@ import apps.steve.fire.randomchat.Constants;
 @IgnoreExtraProperties
 public class ChatMessage {
 
+
+    public final static String KEY_DEFAULT = "-KVk11235813213455";
     private String messageText;
     private String androidID;
     private int messageStatus;
@@ -101,6 +103,16 @@ public class ChatMessage {
     public static ChatMessage getDefaultMessage(){
         return new ChatMessage(
                 "No messages.",
+                "",
+                Constants.SENT,
+                Constants.MESSAGE_TEXT,
+                -new Date().getTime(),
+                ""
+        );
+    }
+    public static ChatMessage getParedMessage(){
+        return new ChatMessage(
+                "Emparejados.",
                 "",
                 Constants.SENT,
                 Constants.MESSAGE_TEXT,

@@ -159,10 +159,10 @@ public class RandomChat {
             result.put("receptor", receptor.toMap());
         }
         result.put("estado", estado);
-        result.put("search", search);
+        //result.put("search", search);
         result.put("action", action);
         result.put("time", time);
-        result.put("messages", messages);
+        //result.put("messages"+"/" + keyChat, ChatMessage.getParedMessage().toMap());
         result.put("country", country.toMap());
         return result;
     }
@@ -178,7 +178,7 @@ public class RandomChat {
         result.put("search", search);
         result.put("action", action);
         result.put("time", time);
-        result.put("messages", messages);
+        //result.put("messages", messages);
         result.put("country", country.toMap());
         result.put("keyChat", keyChat);
         result.put("hot", hot);

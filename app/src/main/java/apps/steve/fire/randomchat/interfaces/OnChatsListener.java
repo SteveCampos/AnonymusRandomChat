@@ -12,4 +12,5 @@ import apps.steve.fire.randomchat.model.RandomChat;
 public interface OnChatsListener {
     void onChatChangedListener(boolean success, List<RandomChat> chatList);
     void onChatsHotListener(boolean success, List<RandomChat> chatList);
+    void onFragmentReady(int type);
 }

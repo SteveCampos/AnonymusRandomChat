@@ -55,7 +55,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-
 public class ChatActivity extends AppCompatActivity implements SizeNotifierRelativeLayout.SizeNotifierRelativeLayoutDelegate, NotificationCenter.NotificationCenterDelegate, OnRoomListener {
 
     private static final String TAG = ChatActivity.class.getSimpleName();
@@ -100,6 +99,8 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
     private boolean isHot = false;
 
+    private boolean mIsRunning = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,8 +118,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         androidID = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
         String key_random = getIntent().getStringExtra("key_random");
-        int countryId = getIntent().getIntExtra("country_id", Country.ESPANA);
-
+        int countryId = getIntent().getIntExtra("country_id", Country.PERU);
         firebaseRoom = new FirebaseRoom(countryId, key_random, androidID, this);
     }
 
@@ -275,6 +275,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
         firebaseRoom.sendMessage(message);
     }
+
     private AppCompatActivity getActivity() {
         return this;
     }
@@ -478,7 +479,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
         if (height > AndroidUtilities.dp(50) && keyboardVisible) {
             keyboardHeight = height;
-            App.getInstance().getSharedPreferences("emoji", 0).edit().putInt("kbd_height", keyboardHeight).commit();
+            App.getInstance().getSharedPreferences("emoji", 0).edit().putInt("kbd_height", keyboardHeight).apply();
         }
 
 
@@ -548,6 +549,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         if (mAdView != null) {
             mAdView.pause();
         }
+        mIsRunning = false;
         hideEmojiPopup();
     }
 
@@ -557,6 +559,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         if (mAdView != null) {
             mAdView.resume();
         }
+        mIsRunning = true;
     }
 
     @Override
@@ -573,8 +576,9 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
             chatAdapter.notifyDataSetChanged();
         }
         recycler.scrollToPosition(messages.size() - 1);
-
-        firebaseRoom.setReaded(messages);
+        if (mIsRunning) {
+            firebaseRoom.setReaded(messages);
+        }
     }
 
     @Override
@@ -603,7 +607,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     @Override
     public void onHimReaded(Emisor him) {
         Log.d(TAG, "onHimReaded");
-        if (him==null){
+        if (him == null) {
             return;
         }
         this.him = him;
@@ -625,15 +629,22 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     @Override
     public void onRoomStateChanged(String state) {
         Log.d(TAG, "onRoomStateChanged state: " + state);
+        if (state == null) {
+            return;
+        }
 
         String lastConnection = "";
-        if (state.equals(Constants.CHAT_STATE_WAITING)) {
-            lastConnection = getString(R.string.chat_state_waiting);
-        } else if (state.equals(Constants.CHAT_STATE_PARED)) {
-            lastConnection = getString(R.string.chat_state_pared);
-            //Snackbar.make(toolbar, lastConnection, Snackbar.LENGTH_LONG).show();
-        } else if(state.equals(Constants.CHAT_STATE_BLOCK)){
-            lastConnection = getString(R.string.chat_state_blocked);
+        switch (state) {
+            case Constants.CHAT_STATE_WAITING:
+                lastConnection = getString(R.string.chat_state_waiting);
+                break;
+            case Constants.CHAT_STATE_PARED:
+                lastConnection = getString(R.string.chat_state_pared);
+                //Snackbar.make(toolbar, lastConnection, Snackbar.LENGTH_LONG).show();
+                break;
+            case Constants.CHAT_STATE_BLOCK:
+                lastConnection = getString(R.string.chat_state_blocked);
+                break;
         }
 
         textLastConnection.setText(lastConnection);
@@ -643,14 +654,14 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     public void onRoomActionChanged(String action) {
         Log.d(TAG, "onRoomActionChanged action: " + action);
 
-        if (him == null || me == null){
+        if (him == null || me == null) {
             return;
         }
 
         if (action.equals(him.getKeyDevice() + Constants.CHAT_STATE_WRITING)) {
             textLastConnection.setText(R.string.chat_state_writing);
         } else if (action.equals(Constants.CHAT_STATE_NO_ACTION)) {
-                textLastConnection.setText(R.string.state_online);
+            textLastConnection.setText(R.string.state_online);
         }
     }
 
@@ -675,7 +686,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        int ID = isHot ? R.drawable.ic_whatshot_red_24dp : R.drawable.ic_whatshot_black_24dp;
+        int ID = isHot ? R.drawable.ic_whatshot_red_24dp : R.drawable.ic_whatshot_white_24dp;
         menu.findItem(R.id.action_hot).setIcon(ContextCompat.getDrawable(getActivity(), ID));
         return super.onPrepareOptionsMenu(menu);
     }

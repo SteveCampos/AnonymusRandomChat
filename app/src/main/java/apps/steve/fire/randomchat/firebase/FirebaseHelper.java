@@ -68,9 +68,6 @@ public class FirebaseHelper {
     //private static boolean isPersisted = false;
 
     public FirebaseHelper(Context context) {
-        if (firebaseDatabase != null){
-            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-        }
         this.firebaseDatabase = FirebaseDatabase.getInstance();
         this.refCountries = firebaseDatabase.getReference(Constants.CHILD_COUNTRIES);
         this.refUsers = firebaseDatabase.getReference(Constants.CHILD_USERS);
@@ -262,7 +259,6 @@ public class FirebaseHelper {
 
         Log.d(TAG, "KEY CHAT : " + keyChat);
 
-
         String pathToHisto = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + keyChat;
         String pathToWaiting = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_WAITING + "/" + keyChat;
         String pathToPared = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_PARED + "/" + keyChat;
@@ -400,7 +396,13 @@ public class FirebaseHelper {
 
 
         updateNodes.put(pathToWaiting, null);
-        updateNodes.put(pathToPared, nodeRandom.toMap());
+        updateNodes.put(pathToPared + "/emisor", emisor.toMap());
+        updateNodes.put(pathToPared + "/receptor", me.toMap());
+        updateNodes.put(pathToPared + "/estado", Constants.CHAT_STATE_PARED);
+        updateNodes.put(pathToPared + "/action", Constants.CHAT_STATE_NO_ACTION);
+        updateNodes.put(pathToPared + "/time", now);
+        updateNodes.put(pathToPared + "/messages/"+keyChat, ChatMessage.getParedMessage().toMap());
+
         updateNodes.put(pathToHistoEmisor, nodeRandom.toHistoMap());
         updateNodes.put(pathToHistoMe, nodeRandom.toHistoMap());
 

@@ -1,6 +1,7 @@
 package apps.steve.fire.randomchat.fragments;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -39,6 +40,11 @@ import me.leolin.shortcutbadger.ShortcutBadger;
 public class ChatsFragment extends Fragment implements OnChatItemClickListener {
 
 
+    public final static int TYPE_ALL = 1123;
+    public final static int TYPE_HOTS = 5813;
+
+    private OnChatsListener listener;
+
     @BindView(R.id.my_recycler_view)
     RecyclerView recyclerView;
 
@@ -49,10 +55,11 @@ public class ChatsFragment extends Fragment implements OnChatItemClickListener {
         // Required empty public constructor
     }
 
-    public static ChatsFragment newInstance(String androidID){
+    public static ChatsFragment newInstance(String androidID, int type){
         ChatsFragment fragment = new ChatsFragment();
         Bundle args = new Bundle();
-        args.putString("androidID", androidID);
+        args.putString("ARG_ANDROID_ID", androidID);
+        args.putInt("ARG_TYPE_CHATS", type);
         fragment.setArguments(args);
         return fragment;
     }
@@ -64,15 +71,16 @@ public class ChatsFragment extends Fragment implements OnChatItemClickListener {
         // Inflate the layout for this fragment
         recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
         ButterKnife.bind(this, recyclerView);
-        setRecyclerView(getArguments().getString("androidID"));
+        setRecyclerView(getArguments().getString("ARG_ANDROID_ID"), getArguments().getInt("ARG_TYPE_CHATS", TYPE_ALL));
         setRetainInstance(true);
         return recyclerView;
     }
 
-    private void setRecyclerView(String androidID){
+    private void setRecyclerView(String androidID, int type){
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapter = new HistorialChatAdapter(null, getActivity(), androidID , this);
         recyclerView.setAdapter(adapter);
+        listener.onFragmentReady(type);
     }
 
     public void setData(List<RandomChat> list){
@@ -100,6 +108,7 @@ public class ChatsFragment extends Fragment implements OnChatItemClickListener {
         updateShortCut(item);
         launchChatActivity(item, Constants._HERE);
     }
+
     private void updateShortCut(RandomChat item){
         int x = item.getNoReaded();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -109,12 +118,37 @@ public class ChatsFragment extends Fragment implements OnChatItemClickListener {
         noReaded = noReaded > x ? (noReaded - x) : 0;
         editor.putInt(Constants.PREF_NOTI_COUNT, noReaded);
 
+        if (item.getEmisor() ==null || item.getReceptor() ==null){
+            return;
+        }
+
         if (item.getEmisor().getKeyDevice().equals(lastUserIdNoti) || item.getReceptor().getKeyDevice().equals(lastUserIdNoti)){
             editor.putString(Constants.PREF_NOTI_MESSAGES, "");
         }
-
         editor.apply();
         ShortcutBadger.applyCount(getContext(), noReaded);
 
+    }
+
+    // This event fires 1st, before creation of fragment or any views
+    // The onAttach method is called when the Fragment instance is associated with an Activity.
+    // This does not mean the Activity is fully initialized.
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnChatsListener) {
+            listener = (OnChatsListener) context;
+        } else {
+            throw new ClassCastException(context.toString()
+                    + " must implement OnSearchListener");
+        }
+    }
+
+    // This method is called when the fragment is no longer connected to the Activity
+    // Any references saved in onAttach should be nulled out here to prevent memory leaks.
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        this.listener = null;
     }
 }

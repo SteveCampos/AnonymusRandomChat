@@ -213,7 +213,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void bind(ChatMessage message, Context context){
             Glide.with(context)
                     .load(message.getMessageText()) // Uri of the picture
-                    .placeholder(R.drawable.ic_whatshot_black_24dp)
+                    .placeholder(R.drawable.ic_whatshot_white_24dp)
                     .into(imageView);
 
             textViewMessageTime.setText(SIMPLE_DATE_FORMAT.format(message.getMessageTime()));

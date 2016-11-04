@@ -115,7 +115,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                 ++notificationFromCount;
 
-                Toast.makeText(this, countNotification +"  de " + notificationFromCount + " usuario(s)", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, countNotification +"  de " + notificationFromCount + " usuario(s)", Toast.LENGTH_SHORT).show();
             }
 
         }else{
