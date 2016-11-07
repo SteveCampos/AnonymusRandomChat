@@ -84,7 +84,12 @@ public class ChatsFragment extends Fragment implements OnChatItemClickListener {
     }
 
     public void setData(List<RandomChat> list){
-        if (adapter!=null){
+        if (adapter!=null && list != null){
+            if (list.size() > 4){
+                if (list.get(1) != null){
+                    list.add(1, null);
+                }
+            }
             adapter.setData(list);
         }
     }

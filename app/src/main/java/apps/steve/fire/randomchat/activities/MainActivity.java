@@ -2,7 +2,6 @@ package apps.steve.fire.randomchat.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -17,7 +16,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -37,23 +35,18 @@ import apps.steve.fire.randomchat.R;
 import apps.steve.fire.randomchat.Utils;
 import apps.steve.fire.randomchat.adapters.CountryAutocompleteAdapter;
 import apps.steve.fire.randomchat.adapters.MyFragmentAdapter;
-import apps.steve.fire.randomchat.adapters.PlaceAutocompleteAdapter;
 import apps.steve.fire.randomchat.firebase.FirebaseHelper;
 import apps.steve.fire.randomchat.fragments.ChatsFragment;
 import apps.steve.fire.randomchat.fragments.SearchFragment;
-import apps.steve.fire.randomchat.fragments.TrendFragment;
 import apps.steve.fire.randomchat.interfaces.OnChatsListener;
 import apps.steve.fire.randomchat.interfaces.OnSearchListener;
 import apps.steve.fire.randomchat.model.Connection;
 import apps.steve.fire.randomchat.model.Country;
-import apps.steve.fire.randomchat.model.HistorialChat;
 import apps.steve.fire.randomchat.model.RandomChat;
 import apps.steve.fire.randomchat.model.User;
-import apps.steve.fire.randomchat.notifications.NotificationFireListener;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import me.leolin.shortcutbadger.ShortcutBadger;
 
 public class MainActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, NavigationView.OnNavigationItemSelectedListener, OnChatsListener, OnSearchListener, AdapterView.OnItemClickListener {
 
@@ -152,39 +145,6 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         return true;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode,
-                                    int resultCode, Intent data) {
-
-        /*if (requestCode == REQUEST_PLACE_PICKER
-                && resultCode == RESULT_OK) {
-
-            // The user has selected a place. Extract the name and address.
-            final Place place = PlacePicker.getPlace(this, data);
-
-            final CharSequence name = place.getName();
-            final CharSequence address = place.getAddress();
-            String attributions = PlacePicker.getAttributions(data);
-            if (attributions == null) {
-                attributions = "";
-            }
-
-            Snackbar.make(toolbar, "name: " + name, Snackbar.LENGTH_LONG).show();
-
-            Log.d(TAG, "name: " + name);
-            Log.d(TAG, "address: " + address);
-            Log.d(TAG, "attributions: " + attributions);
-
-            /*
-            mViewName.setText(name);
-            mViewAddress.setText(address);
-            mViewAttributions.setText(Html.fromHtml(attributions));s
-
-        } else {
-        }*/
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     private void initFirebase() {
         Log.d(TAG, "initFirebase");
         firebaseHelper = new FirebaseHelper(getActivity());
@@ -205,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     @Override
     protected void onStop() {
         Log.d(TAG, "onStop");
+        firebaseHelper.setOff();
         super.onStop();
     }
 
@@ -247,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
             if (TextUtils.isEmpty(android_id)) {
                 android_id = Utils.getAndroidID(this);
             }
-            startService(new Intent(getActivity(), NotificationFireListener.class));
+            //startService(new Intent(getActivity(), NotificationFireListener.class));
             firebaseHelper.createUser(android_id, user);
         }
     }
@@ -510,7 +471,6 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onCreate");
-        firebaseHelper.setOff();
         super.onDestroy();
     }
 
@@ -575,19 +535,16 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         startActivity(i);
     }
 
-
-    /*
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Toast.makeText(this, "onConnectionFailed", Toast.LENGTH_SHORT).show();
-    }*/
-
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         Country country = countryAutocompleteAdapter.getItem(i);
         Snackbar.make(toolbar, country.getName(), Snackbar.LENGTH_LONG).show();
-        searchView.clearFocus();
-        searchView.onActionViewCollapsed();
+        //searchView.clearFocus();
+        //searchView.onActionViewCollapsed();
+        /*if (!searchView.isIconified()) {
+            searchView.setIconified(true);
+        }*/
+        invalidateOptionsMenu();
         setCountry(country);
     }
 

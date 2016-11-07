@@ -21,6 +21,7 @@ import com.google.android.gms.ads.AdListener;
 import com.like.LikeButton;
 import com.like.OnLikeListener;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     private final OnChatItemClickListener listener;
     // Store a member variable for the contacts
-    private List<RandomChat> mHistorial;
+    private List<RandomChat> mHistorial = new ArrayList<>();
     private Context mContext;
     String androidID;
 
@@ -82,17 +83,24 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
         return viewHolder;
     }
-    public void setData(List<RandomChat> mHistorial) {
-        this.mHistorial = mHistorial;
+
+    public void setData(List<RandomChat> list) {
+        this.mHistorial = list;
         notifyDataSetChanged();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position == 1) {
+        if (mHistorial.get(position) == null) {
             return NATIVE_AD_VIEW_TYPE;
         }
 
+        switch (mHistorial.get(position).getLastMessage().getMessageType()) {
+            case Constants.MESSAGE_TEXT:
+                break;
+            default:
+                break;
+        }
         return CHAT_VIEW_TYPE;
     }
 
@@ -118,31 +126,31 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<RecyclerView.View
                     @Override
                     public void onAdClosed() {
                         super.onAdClosed();
-                        Toast.makeText(mContext, "onAdClosed", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "onAdClosed", Toast.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onAdFailedToLoad(int i) {
                         super.onAdFailedToLoad(i);
-                        Toast.makeText(mContext, "onAdFailedToLoad", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "onAdFailedToLoad", Toast.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onAdLeftApplication() {
                         super.onAdLeftApplication();
-                        Toast.makeText(mContext, "onAdLeftApplication", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "onAdLeftApplication", Toast.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onAdOpened() {
                         super.onAdOpened();
-                        Toast.makeText(mContext, "onAdOpened", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "onAdOpened", Toast.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onAdLoaded() {
                         super.onAdLoaded();
-                        Toast.makeText(mContext, "onAdLoaded", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "onAdLoaded", Toast.LENGTH_LONG).show();
                     }
                 });
                 break;

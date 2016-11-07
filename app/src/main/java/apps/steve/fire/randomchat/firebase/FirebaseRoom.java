@@ -42,7 +42,7 @@ public class FirebaseRoom {
 
 
     private DatabaseReference messagesReference;
-    private DatabaseReference userReference;
+    private DatabaseReference refUsers;
 
 
     private DatabaseReference receptorReference;
@@ -92,14 +92,14 @@ public class FirebaseRoom {
         this.roomReference = firebaseDatabase.getReference(Constants.CHILD_COUNTRIES).child(country.getNameID()).child(Constants.CHILD_RANDOMS).child(Constants.CHAT_STATE_PARED).child(key);
 
         this.messagesReference = roomReference.child(Constants.CHILD_MESSAGES);
-        this.userReference = firebaseDatabase.getReference(Constants.CHILD_USERS);
+        this.refUsers = firebaseDatabase.getReference(Constants.CHILD_USERS);
 
         this.roomReceptorReference = roomReference.child("receptor");
         this.roomEmisorReference = roomReference.child("emisor");
         this.stateReference = roomReference.child("estado");
         this.actionReference = roomReference.child("action");
 
-        this.userHistoRoomRef = userReference.child(androidID).child(Constants.CHILD_USERS_HISTO_CHATS).child(key);
+        this.userHistoRoomRef = refUsers.child(androidID).child(Constants.CHILD_USERS_HISTO_CHATS).child(key);
         this.userHistoRoomHotRef = userHistoRoomRef.child("hot");
 
 
@@ -207,6 +207,8 @@ public class FirebaseRoom {
                 String toReceptor = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key;
                 String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + keyMessage;
 
+                messages.add(message);//ADDING THE LAST MESSAGE
+
                 messagePost.put(toReceptor + "/lastMessage", messageValues);
                 List<String> messageNoReaded = calculateMessagesNoReaded();
 
@@ -217,7 +219,6 @@ public class FirebaseRoom {
                     if (!himConnection.getState().equals(Constants.STATE_ONLINE)) {
                         String messages = getStringofArray(messageNoReaded);
                         messagePost.put(notificationPath, new Notification(me.getKeyDevice(), him.getKeyDevice(), message.getMessageText(), country.getCountryID(), key, me.getGenero(), Constants.SENT).toMap());
-
                     }
                 }
             }
@@ -235,7 +236,12 @@ public class FirebaseRoom {
 
     private List<String> calculateMessagesNoReaded() {
         List<String> messageNoReaded = new ArrayList<>();
+
+        Log.d(TAG, "calculating MessagesNoReaded...");
+        Log.d(TAG, "messages.size(): " + messages.size());
         for (int i = 0; i < messages.size(); i++) {
+            Log.d(TAG, "messages.get(i).getMessageStatus(): " + messages.get(i).getMessageStatus());
+            Log.d(TAG, "messages.get(i).getMessageText(): " + messages.get(i).getMessageText());
             if (messages.get(i).getMessageStatus() != Constants.READED && messages.get(i).getAndroidID().equals(androidID)) { //&& messages.get(i).getAndroidID().equals(androidID)
                 messageNoReaded.add(messages.get(i).getMessageText());
             }
@@ -438,6 +444,14 @@ public class FirebaseRoom {
                 Log.d(TAG, "listenReceptorConnection databaseError: " + databaseError.getMessage());
             }
         });
+    }
+
+    public void setOff(){
+        refUsers.child(androidID).child(Constants.CHILD_CONNECTION).setValue(new Connection(Constants.STATE_OFFLINE, new Date().getTime()));
+    }
+
+    public void setOn(){
+        refUsers.child(androidID).child(Constants.CHILD_CONNECTION).setValue(new Connection(Constants.STATE_ONLINE, new Date().getTime()));
     }
 
 }

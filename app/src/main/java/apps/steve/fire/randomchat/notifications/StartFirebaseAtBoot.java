@@ -11,6 +11,6 @@ import android.content.Intent;
 public class StartFirebaseAtBoot extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        context.startService(new Intent(context, NotificationFireListener.class));
+        //context.startService(new Intent(context, NotificationFireListener.class));
     }
 }

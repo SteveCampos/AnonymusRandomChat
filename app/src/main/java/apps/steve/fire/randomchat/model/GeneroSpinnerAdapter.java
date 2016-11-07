@@ -50,6 +50,10 @@ public class GeneroSpinnerAdapter extends BaseAdapter {
         return mItems.get(position);
     }
 
+    public int getPosition(String value){
+        return mItems.indexOf(value);
+    }
+
     @Override
     public long getItemId(int position) {
         return position;

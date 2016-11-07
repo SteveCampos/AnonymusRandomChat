@@ -93,7 +93,7 @@ public class FirebaseHelper {
     public void createUser(String id, User user) {
 
         Log.d(TAG, "createUser ...");
-        refUsers.child(id).setValue(user, new DatabaseReference.CompletionListener() {
+        refUsers.child(id).updateChildren(user.toMap(), new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 if (databaseError == null) {
@@ -109,6 +109,23 @@ public class FirebaseHelper {
                 }
             }
         });
+        /*
+        refUsers.child(id).setValue(user, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError == null) {
+                    //ON SUCCESS
+                    Log.d(TAG, "createUser SUCCESS");
+                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putBoolean("firstTime", true);
+                    editor.apply();
+
+                } else {
+                    Log.d(TAG, "createUser databaseError: " + databaseError);
+                }
+            }
+        });*/
     }
 
 
@@ -519,7 +536,6 @@ public class FirebaseHelper {
     public void setOff(){
         refUsers.child(androidID).child(Constants.CHILD_CONNECTION).setValue(new Connection(Constants.STATE_OFFLINE, new Date().getTime()));
     }
-
     public void setOn(){
         refUsers.child(androidID).child(Constants.CHILD_CONNECTION).setValue(new Connection(Constants.STATE_ONLINE, new Date().getTime()));
     }

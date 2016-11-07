@@ -4,6 +4,7 @@ package apps.steve.fire.randomchat.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -162,6 +164,10 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
 
     private View view;
 
+    private boolean isViewsCreated = false;
+    private boolean isSpinnerEmisorFirsTime = true;
+    private boolean isSpinnerReceptorFirsTime = true;
+
     public
     SearchFragment() {
         // Required empty public constructor
@@ -192,14 +198,15 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
     @Override
     public void onResume() {
         ButterKnife.bind(this, view);
-        init();
         Log.d(TAG, "onResume");
+        init();
         super.onResume();
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onViewCreated");
+        isViewsCreated = true;
         super.onViewCreated(view, savedInstanceState);
     }
 
@@ -212,10 +219,15 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
     @Override
     public void onDestroyView() {
         Log.d(TAG, "onDestroyView");
+        isViewsCreated = false;
         super.onDestroyView();
     }
 
     public void startChat() {
+        if (!isViewsCreated){
+            return;
+        }
+
         Snackbar.make(linearLayoutCompat, R.string.app_name, Snackbar.LENGTH_LONG).show();
         enabledInputs(false);
         Utils.saveEmisor(getActivity(), new Emisor(android_id, emisorEdad, genero.name(), new Looking(receptorEdadMin, receptorEdadMax, generoReceptor.name())));
@@ -227,6 +239,11 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
     private void init() {
 
         Log.d(TAG, "init()");
+
+        GeneroSpinnerAdapter spinnerAdapter = new GeneroSpinnerAdapter(getActivity());
+        spinnerAdapter.addItems(Arrays.asList(generos));
+        spinnerGenero.setAdapter(spinnerAdapter);
+        spinnerGeneroReceptor.setAdapter(spinnerAdapter);
         //firebaseHelper = new FirebaseHelper(getActivity());
 
 
@@ -238,17 +255,12 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
         //SET DEFAULT VALUES
 
         android_id = getAndroidID(getActivity());
-        genero = Constants.Genero.CHICO;
-        generoReceptor = Constants.Genero.CHICO;
+        //genero = Constants.Genero.CHICA;
+        //generoReceptor = Constants.Genero.CHICA;
+
 
 
         circledPickerEdad.setValue(18);
-
-        GeneroSpinnerAdapter spinnerAdapter = new GeneroSpinnerAdapter(getActivity());
-        spinnerAdapter.addItems(Arrays.asList(generos));
-
-        spinnerGenero.setAdapter(spinnerAdapter);
-        spinnerGeneroReceptor.setAdapter(spinnerAdapter);
 
         receptorEdadMin = 18;
         receptorEdadMax = 48;
@@ -256,8 +268,40 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
         rangeBarReceptor.setOnRangeBarChangeListener(this);
         circledPickerEdad.setOnMoveListener(this);
         enabledInputs(true);
-        //IF USER NOT EXISTS, CREATE.
-//        createUser();
+
+
+        //PREFERENCES
+
+        Log.d(TAG, "SETTING PREFERENCES ...");
+
+        Emisor prefEmisor = Utils.getEmisor(getActivity());
+        genero = Constants.Genero.valueOf(prefEmisor.getGenero());
+        emisorEdad = prefEmisor.getEdad();
+        generoReceptor = Constants.Genero.valueOf(prefEmisor.getLooking().getGenero());
+        switch (genero){
+            case CHICO:
+                spinnerGenero.setSelection(0);
+                break;
+            case CHICA:
+                spinnerGenero.setSelection(1);
+                break;
+        }
+        switch (generoReceptor){
+            case CHICO:
+                spinnerGeneroReceptor.setSelection(0);
+                break;
+            case CHICA:
+                spinnerGeneroReceptor.setSelection(1);
+                break;
+        }
+
+        //spinnerGenero.setSelection(((GeneroSpinnerAdapter)spinnerGenero.getAdapter()).getPosition(prefEmisor.getGenero()));
+        //spinnerGeneroReceptor.setSelection(((GeneroSpinnerAdapter)spinnerGenero.getAdapter()).getPosition(prefEmisor.getLooking().getGenero()));
+        Log.d(TAG, "((GeneroSpinnerAdapter)spinnerGenero.getAdapter()).getPosition(prefEmisor.getLooking().getGenero()): " + ((GeneroSpinnerAdapter)spinnerGenero.getAdapter()).getPosition(prefEmisor.getLooking().getGenero()));
+        receptorEdadMin = prefEmisor.getLooking().getEdadMin();
+        receptorEdadMax = prefEmisor.getLooking().getEdadMax();
+        updateUIEmisor();
+        updateUIReceptor();
     }
 
     @Override
@@ -293,6 +337,11 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
 
     @OnItemSelected({R.id.text_range_age})
     void onItemSelected(Spinner spinner, int position) {
+        Log.d(TAG, "onItemSelected position: "+ position);
+        /*if (isSpinnerEmisorFirsTime){
+            isSpinnerEmisorFirsTime = false;
+            return;
+        }*/
         switch (position) {
             case 0:
                 genero = Constants.Genero.CHICO;
@@ -310,6 +359,12 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
 
     @OnItemSelected({R.id.spinner_genero_receptor})
     void onItemSelectedReceptor(Spinner spinner, int position) {
+  /*      if (isSpinnerReceptorFirsTime){
+            isSpinnerReceptorFirsTime = false;
+            return;
+        }
+*/
+        Log.d(TAG, "onItemSelectedReceptor position: "+ position);
         switch (position) {
             case 0:
                 generoReceptor = Constants.Genero.CHICO;

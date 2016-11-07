@@ -1,5 +1,10 @@
 package apps.steve.fire.randomchat.model;
 
+import com.google.firebase.database.Exclude;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Steve on 9/07/2016.
  */
@@ -62,5 +67,16 @@ User {
 
     public void setGenero(String genero) {
         this.genero = genero;
+    }
+
+    @Exclude
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("name", name);
+        result.put("connection", connection.toMap());
+        result.put("timeCreated", timeCreated);
+        result.put("age", age);
+        result.put("genero", genero);
+        return result;
     }
 }

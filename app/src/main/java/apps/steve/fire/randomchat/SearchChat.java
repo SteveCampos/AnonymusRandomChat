@@ -239,7 +239,7 @@ public class SearchChat extends AppCompatActivity implements RangeBar.OnRangeBar
         //addNewBubble();
         readNodeRandoms();
 
-        startService(new Intent(getActivity(), NotificationFireListener.class));
+        //startService(new Intent(getActivity(), NotificationFireListener.class));
 
         Snackbar.make(fab, "Searching chat ...", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();

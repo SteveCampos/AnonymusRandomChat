@@ -61,7 +61,7 @@ public class TrendFragment extends Fragment implements TrendAdapter.OnUserTrendL
 
     @Override
     public void onUserTrendListener(UserTrend item, View view, boolean liked) {
-        getActivity().startService(new Intent(getActivity(), NotificationFireListener.class));
-        Snackbar.make(recyclerView, item.getGenero(), Snackbar.LENGTH_LONG).show();
+        //getActivity().startService(new Intent(getActivity(), NotificationFireListener.class));
+        //Snackbar.make(recyclerView, item.getGenero(), Snackbar.LENGTH_LONG).show();
     }
 }

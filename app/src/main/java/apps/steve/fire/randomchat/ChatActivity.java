@@ -100,13 +100,13 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     private boolean isHot = false;
 
     private boolean mIsRunning = false;
+    private String keyRandom;
+    private int countryId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        ButterKnife.bind(this);
-        initViews();
 
         // Check whether we're recreating a previously destroyed instance
         if (savedInstanceState != null) {
@@ -117,10 +117,26 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
         androidID = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
-        String key_random = getIntent().getStringExtra("key_random");
-        int countryId = getIntent().getIntExtra("country_id", Country.PERU);
-        firebaseRoom = new FirebaseRoom(countryId, key_random, androidID, this);
+        this.keyRandom = getIntent().getStringExtra("key_random");
+        this.countryId = getIntent().getIntExtra("country_id", Country.PERU);
     }
+
+
+    @Override
+    protected void onResume() {
+        Log.d(TAG, "onResume");
+        if (mAdView != null) {
+            mAdView.resume();
+        }
+        mIsRunning = true;
+
+        ButterKnife.bind(this);
+        firebaseRoom = new FirebaseRoom(countryId, keyRandom, androidID, this);
+        firebaseRoom.setOn();
+        initViews();
+        super.onResume();
+    }
+
 
     private void initViews() {
 
@@ -520,6 +536,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy");
         firebaseRoom.removeMessageListener();
         super.onDestroy();
         if (mAdView != null) {
@@ -554,12 +571,10 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (mAdView != null) {
-            mAdView.resume();
-        }
-        mIsRunning = true;
+    protected void onStop() {
+        Log.d(TAG, "onStop");
+        firebaseRoom.setOff();
+        super.onStop();
     }
 
     @Override

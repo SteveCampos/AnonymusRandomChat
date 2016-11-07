@@ -302,7 +302,7 @@ public class Utils {
         Emisor emisor = new Emisor();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         emisor.setEdad(preferences.getInt("emisorEdad",18));
-        emisor.setGenero(preferences.getString("emisorGenero", "CHICO"));
+        emisor.setGenero(preferences.getString("emisorGenero", Constants.Genero.CHICO.toString()));
         emisor.setKeyDevice(preferences.getString("emisorKeyDevice", "emisorKeyDevice"));
         Looking looking = new Looking(
                 preferences.getInt("lookingEdadMin",18),
