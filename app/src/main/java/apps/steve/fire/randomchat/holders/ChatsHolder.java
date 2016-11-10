@@ -18,6 +18,7 @@ import apps.steve.fire.randomchat.Constants;
 import apps.steve.fire.randomchat.R;
 import apps.steve.fire.randomchat.Utils;
 import apps.steve.fire.randomchat.interfaces.OnChatItemClickListener;
+import apps.steve.fire.randomchat.model.ChatMessage;
 import apps.steve.fire.randomchat.model.Country;
 import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.model.RandomChat;
@@ -91,10 +92,28 @@ public class ChatsHolder extends RecyclerView.ViewHolder {
 
 
         message = item.getLastMessage().getMessageText();
+        if (item.getLastMessage().getAndroidID().equals(ChatMessage.AUTOMATIC)){
+            switch (message){
+                case ChatMessage.WAITING:
+                    message = mContext.getString(R.string.chat_state_no_message);
+                    break;
+                case ChatMessage.PARED:
+                    message = mContext.getString(R.string.message_automatic_pared);
+                    break;
+                case ChatMessage.BLOCKED:
+                    message = mContext.getString(R.string.message_automatic_blocked);
+                    break;
+                case ChatMessage.UNBLOCKED:
+                    message = mContext.getString(R.string.message_automatic_unblocked);
+                    break;
+                default:
+                    break;
+            }
+        }
 
         if (item.getLastMessage().getAndroidID().equals(me.getKeyDevice())) {
 
-            int drawableID =  R.drawable.ic_double_check;
+            int drawableID =  R.drawable.ic_check;
 
             switch (item.getLastMessage().getMessageStatus()) {
                 case Constants.READED:
@@ -104,7 +123,7 @@ public class ChatsHolder extends RecyclerView.ViewHolder {
                     drawableID = R.drawable.ic_double_check;
                     break;
                 case Constants.SENT:
-                    drawableID = R.drawable.ic_check;
+                    drawableID = R.drawable.ic_check;//ic_check
                     break;
             }
 

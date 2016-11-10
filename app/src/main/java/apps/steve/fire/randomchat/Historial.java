@@ -155,4 +155,9 @@ public class Historial extends AppCompatActivity implements OnChatItemClickListe
     public void onChatItemClicked(RandomChat item, View view, boolean liked) {
         launchChatActivity(item, Constants._HERE);
     }
+
+    @Override
+    public void onLoadMore() {
+
+    }
 }

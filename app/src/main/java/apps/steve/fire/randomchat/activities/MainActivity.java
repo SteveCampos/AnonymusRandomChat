@@ -139,9 +139,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         searchAutoComplete.setAdapter(countryAutocompleteAdapter);
         searchAutoComplete.setOnItemClickListener(this);
         //searchAutoComplete.setOnItemSelectedListener(this);
-
         //searchView.setIconifiedByDefault(false);
-
         return true;
     }
 
@@ -439,13 +437,16 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     @Override
-    public void onFragmentReady(int type) {
-        switch (type) {
-            case ChatsFragment.TYPE_ALL:
+    public void onLoadMore() {
+        switch (currentItem) {
+            case 0:
                 //send List<> All
+                Log.d(TAG, "currentItem: " + 0);
                 break;
-            case ChatsFragment.TYPE_HOTS:
+            case 1:
+                firebaseHelper.incrementLimit(20);
                 //send List<> Hots
+                Log.d(TAG, "currentItem: " + 1);
                 break;
             default:
                 break;

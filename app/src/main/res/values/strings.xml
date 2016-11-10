@@ -11,7 +11,8 @@
 
     <string name="chat_state_writing">Escribiendo…</string>
     <string name="chat_state_waiting">Esperando…</string>
-    <string name="chat_state_pared">Emparejado</string>
+    <string name="chat_state_no_message">Sin mensajes</string>
+    <string name="chat_state_pared">Unidos</string>
     <string name="chat_state_blocked">Blockeado</string>
 
     <string name="article_emisor">Yo:</string>
@@ -71,7 +72,16 @@
     <string name="title_activity_upload_imge">UploadImage</string>
     <string name="action_settings">Settings</string>
     <string name="action_block">Blockear</string>
+    <string name="action_unblock">Desblockear</string>
     <string name="action_change_name">Cambiar Nombre</string>
+
+    <string name="message_automatic_pared">Unidos</string>
+    <string name="message_automatic_blocked">Blockeado</string>
+
+    <string name="message_automatic_unblocked">Desblockeado</string>
+
+    <string name="action_unblock_imposible">Sólo el que bloqueó el chat, puede desbloquearlo.</string>
+
 
     <string name="action_search">Search University</string>
 
@@ -89,6 +99,10 @@
     <string name="banner_top_ad_unit_id">ca-app-pub-7677000963765033/9663714103</string>
     <string name="native_list_ad_unit_id">ca-app-pub-7677000963765033/2602838508</string>
 
+
+    <!--NOTIFICATION-->
+    <string name="notification_count_messages">%d nuevo(s) mensaje(s).</string>
+    <string name="notification_summary_messages">%1$d Chats %2$d nuevo(s) mensaje(s).</string>
 
     <!--LIST OF ALL COUNTRYIES -->
     <string name="country_abkhazia">Abkhazia</string>
@@ -353,7 +367,4 @@
     <string name="country_yemen">Yemen</string>
     <string name="country_zambia">Zambia</string>
     <string name="country_zimbabwe">Zimbabwe</string>
-
-
-
 </resources>

@@ -265,21 +265,23 @@ public class FirebaseRoom {
         return messages;
     }
 
-    public void block(){
+    public void block(boolean block){ //States supported Blocked, unblocked
+        String state = block ? Constants.CHAT_STATE_BLOCK : Constants.CHAT_STATE_UNBLOCKED;
+        final ChatMessage message = block ? ChatMessage.getBlockedMessage() : ChatMessage.getUnblockedMessage();
+
 
         Map<String, Object> blockChat = new HashMap<>();
-
         //String roomState = "/" + Constants.CHILD_RANDOMS + "/" + key + "/" + Constants.CHILD_STATE + "/";
         String roomState = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_PARED + "/" + key + "/" + Constants.CHILD_STATE + "/";
-        blockChat.put(roomState, Constants.CHAT_STATE_BLOCK);
+        blockChat.put(roomState, androidID + state);
 
         if (me != null){
             String meRoomState = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key + "/" + Constants.CHILD_STATE + "/";
-            blockChat.put(meRoomState, Constants.CHAT_STATE_BLOCK);
+            blockChat.put(meRoomState, androidID + state);
 
             if (him != null){
                 String himRoomState = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key + "/" + Constants.CHILD_STATE + "/";;
-                blockChat.put(himRoomState, Constants.CHAT_STATE_BLOCK);
+                blockChat.put(himRoomState, androidID + state);
             }
         }
 
@@ -287,6 +289,7 @@ public class FirebaseRoom {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 Log.d(TAG, databaseError == null ? "block": "block databaseError: "+ databaseError);
+                sendMessage(message);
             }
         });
     }

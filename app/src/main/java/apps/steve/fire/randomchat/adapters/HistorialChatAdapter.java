@@ -6,6 +6,7 @@ import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
@@ -55,11 +56,54 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<RecyclerView.View
     private Context mContext;
     String androidID;
 
+    //ONENDLESSSCROLL LISTENER
+    private LinearLayoutManager mLinearLayoutManager;
+    private boolean isMoreLoading = false;
+    private int visibleThreshold = 1;
+    int firstVisibleItem, visibleItemCount, totalItemCount;
+    private int previousTotal = 0; // The total number of items in the dataset after the last load
+    private boolean loading = true; // True if we are still waiting for the last set of data to load.
+
+
     public HistorialChatAdapter(List<RandomChat> mHistorial, Context mContext, String androidID, OnChatItemClickListener listener) {
         this.mHistorial = mHistorial;
         this.mContext = mContext;
         this.listener = listener;
         this.androidID = androidID;
+    }
+
+    public void setLinearLayoutManager(LinearLayoutManager linearLayoutManager){
+        this.mLinearLayoutManager=linearLayoutManager;
+    }
+
+    public void setRecyclerView(RecyclerView mView){
+        mView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                visibleItemCount = recyclerView.getChildCount();
+                totalItemCount = mLinearLayoutManager.getItemCount();
+                firstVisibleItem = mLinearLayoutManager.findFirstVisibleItemPosition();
+                Log.d(TAG, "visibleItemCount: " + visibleItemCount);
+                Log.d(TAG, "totalItemCount: " + totalItemCount);
+                Log.d(TAG, "firstVisibleItem: " + firstVisibleItem);
+                if (loading) {
+                    if (totalItemCount > previousTotal) {
+                        loading = false;
+                        previousTotal = totalItemCount;
+                    }
+                }
+
+                if (totalItemCount < (firstVisibleItem + visibleItemCount)) {
+                //if (!isMoreLoading && (totalItemCount - visibleItemCount)<= (firstVisibleItem + visibleThreshold)) {
+                //if (firstVisibleItem + visibleItemCount <=20) {
+                    if (listener != null) {
+                        listener.onLoadMore();
+                    }
+                    isMoreLoading = true;
+                }
+            }
+        });
     }
 
 
@@ -117,6 +161,11 @@ public class HistorialChatAdapter extends RecyclerView.Adapter<RecyclerView.View
                     @Override
                     public void onChatItemClicked(RandomChat item, View view, boolean liked) {
                         listener.onChatItemClicked(item, view, liked);
+                    }
+
+                    @Override
+                    public void onLoadMore() {
+                        listener.onLoadMore();
                     }
                 });
                 break;

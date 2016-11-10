@@ -95,7 +95,6 @@ public class Notification {
         result.put("from", from);
         result.put("to", to);
         result.put("body", body);
-
         result.put("countryId", countryId);
         result.put("keyRoom", keyRoom);
         result.put("senderGender", senderGender);

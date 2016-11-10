@@ -2,10 +2,13 @@ package apps.steve.fire.randomchat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -53,6 +56,7 @@ import apps.steve.fire.randomchat.widgets.EmojiView;
 import apps.steve.fire.randomchat.widgets.SizeNotifierRelativeLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import me.leolin.shortcutbadger.ShortcutBadger;
 
 
 public class ChatActivity extends AppCompatActivity implements SizeNotifierRelativeLayout.SizeNotifierRelativeLayoutDelegate, NotificationCenter.NotificationCenterDelegate, OnRoomListener {
@@ -102,6 +106,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     private boolean mIsRunning = false;
     private String keyRandom;
     private int countryId;
+    private String chatState = Constants.CHAT_STATE_BLOCK;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,8 +122,45 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
         androidID = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
-        this.keyRandom = getIntent().getStringExtra("key_random");
-        this.countryId = getIntent().getIntExtra("country_id", Country.PERU);
+
+        Intent intent = getIntent();
+
+        this.keyRandom = intent.getStringExtra("key_random");
+        this.countryId = intent.getIntExtra("country_id", Country.PERU);
+
+        if (intent.hasExtra("extra_unread")){
+            int unread = intent.getIntExtra("extra_unread", 0);
+            Log.d(TAG, "extra_unread: " + unread);
+            updateShortCut(unread, keyRandom);
+        }
+
+    }
+    private void updateShortCut(int x, String keyRandom) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences.Editor editor = preferences.edit();
+
+        int noReaded = preferences.getInt(Constants.PREF_NOTI_COUNT, 0);
+        String notiKeys = preferences.getString(Constants.PREF_NOTI_KEYS, "");
+
+        Log.d(TAG, "preferences.getInt(Constants.PREF_NOTI_COUNT, 0): " + noReaded);
+        Log.d(TAG, "item.getNoReaded(): " + x);
+        Log.d(TAG, " count - noReaded: " + (noReaded - x));
+        Log.d(TAG, "preferences.getString(Constants.PREF_NOTI_KEYS, ): " + notiKeys);
+
+        String notiKeysRemoved = notiKeys.replace(keyRandom + ".", "");
+        Log.d(TAG, "notiKeysRemoved " + notiKeysRemoved);
+
+        noReaded = noReaded > x ? (noReaded - x) : 0;
+        Log.d(TAG, "RESULTADO RESTA : " + noReaded);
+
+
+        editor.putString(keyRandom, ""); //Notifications messages to keyChat Readed!
+        editor.putString(Constants.PREF_NOTI_KEYS, notiKeysRemoved);
+        editor.putInt(Constants.PREF_NOTI_COUNT, noReaded);
+        editor.apply();
+
+
+        ShortcutBadger.applyCount(getActivity(), noReaded);
     }
 
 
@@ -129,7 +171,6 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
             mAdView.resume();
         }
         mIsRunning = true;
-
         ButterKnife.bind(this);
         firebaseRoom = new FirebaseRoom(countryId, keyRandom, androidID, this);
         firebaseRoom.setOn();
@@ -279,6 +320,10 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
         if (messageText.trim().length() == 0)
             return;
+        if (chatState.contains(Constants.CHAT_STATE_BLOCK) && !chatState.contains(Constants.CHAT_STATE_UNBLOCKED)) {
+            Snackbar.make(toolbar, R.string.message_automatic_blocked, Snackbar.LENGTH_LONG).show();
+            return;
+        }
 
 
         final ChatMessage message = new ChatMessage();
@@ -409,20 +454,33 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         switch (item.getItemId()) {
             case R.id.action_block:
                 // User chose the "Settings" item, show the app settings UI...
-                firebaseRoom.block();
-                return true;
+                if (chatState.contains(Constants.CHAT_STATE_UNBLOCKED)) {
+                    firebaseRoom.block(true);
+                    break;
+                } else if (chatState.equals(androidID + Constants.CHAT_STATE_BLOCK)) {//ESTÁ BLOQUEADO POR EL MISMO
+                    firebaseRoom.block(false);
+                    break;
+                } else if (chatState.contains(Constants.CHAT_STATE_BLOCK)) {
+                    //Está bloqueado por el otro
+                    Snackbar.make(toolbar, R.string.action_unblock_imposible, Snackbar.LENGTH_LONG).show();
+                    break;
+                } else {
+                    firebaseRoom.block(true);
+                    break;
+                }
 
             case R.id.action_hot:
                 // User chose the "Favorite" action, mark the current item
                 // as a favorite...
                 firebaseRoom.hot();
-                return true;
+                break;
 
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
+                break;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -644,23 +702,30 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     @Override
     public void onRoomStateChanged(String state) {
         Log.d(TAG, "onRoomStateChanged state: " + state);
+        chatState = state;
         if (state == null) {
             return;
         }
-
         String lastConnection = "";
         switch (state) {
             case Constants.CHAT_STATE_WAITING:
                 lastConnection = getString(R.string.chat_state_waiting);
                 break;
             case Constants.CHAT_STATE_PARED:
-                lastConnection = getString(R.string.chat_state_pared);
+                lastConnection = getString(R.string.message_automatic_pared);
                 //Snackbar.make(toolbar, lastConnection, Snackbar.LENGTH_LONG).show();
                 break;
-            case Constants.CHAT_STATE_BLOCK:
-                lastConnection = getString(R.string.chat_state_blocked);
-                break;
         }
+
+        if (state.equals(androidID + Constants.CHAT_STATE_BLOCK)) {
+            lastConnection = getString(R.string.message_automatic_blocked);
+            invalidateOptionsMenu();
+        }
+        if (state.contains(Constants.CHAT_STATE_UNBLOCKED)) {
+            lastConnection = getString(R.string.message_automatic_unblocked);
+            invalidateOptionsMenu();
+        }
+
 
         textLastConnection.setText(lastConnection);
     }
@@ -703,6 +768,19 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     public boolean onPrepareOptionsMenu(Menu menu) {
         int ID = isHot ? R.drawable.ic_whatshot_red_24dp : R.drawable.ic_whatshot_white_24dp;
         menu.findItem(R.id.action_hot).setIcon(ContextCompat.getDrawable(getActivity(), ID));
+
+        int titleBlock = R.string.action_block;
+
+        if (chatState.contains(Constants.CHAT_STATE_BLOCK)) {
+            titleBlock = R.string.action_unblock;
+        }
+
+        if (chatState.contains(Constants.CHAT_STATE_UNBLOCKED)) {
+            titleBlock = R.string.action_block;
+        }
+
+        menu.findItem(R.id.action_block).setTitle(titleBlock);
+
         return super.onPrepareOptionsMenu(menu);
     }
 }

@@ -10,4 +10,5 @@ import apps.steve.fire.randomchat.model.RandomChat;
 
 public interface OnChatItemClickListener {
     void onChatItemClicked(RandomChat item, View view, boolean liked);
+    void onLoadMore();
 }

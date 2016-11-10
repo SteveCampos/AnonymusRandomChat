@@ -26,7 +26,6 @@ import apps.steve.fire.randomchat.model.ChatMessage;
 import apps.steve.fire.randomchat.model.Connection;
 import apps.steve.fire.randomchat.model.Country;
 import apps.steve.fire.randomchat.model.Emisor;
-import apps.steve.fire.randomchat.model.HistorialChat;
 import apps.steve.fire.randomchat.model.RandomChat;
 import apps.steve.fire.randomchat.model.User;
 
@@ -65,6 +64,8 @@ public class FirebaseHelper {
 
     private Country country;
 
+    private int limit = 20;
+
     //private static boolean isPersisted = false;
 
     public FirebaseHelper(Context context) {
@@ -76,6 +77,12 @@ public class FirebaseHelper {
         //PERSISTENCE ENABLED
         refUsers.keepSynced(false);
 
+    }
+
+
+    public void incrementLimit(int limit) {
+        this.limit += limit;
+        listenChats();
     }
 
     public Country getCountry() {
@@ -271,7 +278,7 @@ public class FirebaseHelper {
         chatRandom.setKeyChat(keyChat);
         chatRandom.setNoReaded(0);
         chatRandom.setHot(false);
-        chatRandom.setLastMessage(ChatMessage.getDefaultMessage());
+        chatRandom.setLastMessage(ChatMessage.getWaitingMessage());
         chatRandom.setCountry(country);
 
         Log.d(TAG, "KEY CHAT : " + keyChat);
@@ -407,7 +414,7 @@ public class FirebaseHelper {
         nodeRandom.setTime(now);
         nodeRandom.setKeyChat(keyChat);
         nodeRandom.setHot(false);
-        nodeRandom.setLastMessage(ChatMessage.getDefaultMessage());
+        nodeRandom.setLastMessage(ChatMessage.getParedMessage());
         nodeRandom.setNoReaded(0);
         nodeRandom.setCountry(country);
 
@@ -495,7 +502,7 @@ public class FirebaseHelper {
 
 
     private void listenChats() {
-        queryChats = refUserChats.orderByChild("lastMessage/messageTime").limitToFirst(20);
+        queryChats = refUserChats.orderByChild("lastMessage/messageTime").limitToFirst(limit);
         chatsListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

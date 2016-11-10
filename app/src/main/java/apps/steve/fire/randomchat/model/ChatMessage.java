@@ -9,12 +9,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 import apps.steve.fire.randomchat.Constants;
+import apps.steve.fire.randomchat.Utils;
 
 /**
  * Created by madhur on 17/01/15.
  */
 @IgnoreExtraProperties
 public class ChatMessage {
+
+
+    public final static String AUTOMATIC= "4650";
+    public final static String PARED = "PARED";
+    public final static String BLOCKED = "BLOCKED";
+    public final static String UNBLOCKED = "UNBLOCKED";
+    public final static String WAITING = "WAITING";
 
 
     public final static String KEY_DEFAULT = "-KVk11235813213455";
@@ -40,7 +48,7 @@ public class ChatMessage {
     }
 
     public long getMessageTime() {
-        return messageTime;
+        return Utils.abs(messageTime);
     }
 
     public void setMessageTime(long messageTime) {
@@ -61,7 +69,6 @@ public class ChatMessage {
     }
 
     public String getMessageText() {
-
         return messageText;
     }
 
@@ -100,10 +107,10 @@ public class ChatMessage {
         return result;
     }
 
-    public static ChatMessage getDefaultMessage(){
+    public static ChatMessage getWaitingMessage(){
         return new ChatMessage(
-                "No messages.",
-                "",
+                WAITING,
+                AUTOMATIC,
                 Constants.SENT,
                 Constants.MESSAGE_TEXT,
                 -new Date().getTime(),
@@ -112,12 +119,34 @@ public class ChatMessage {
     }
     public static ChatMessage getParedMessage(){
         return new ChatMessage(
-                "Emparejados.",
-                "",
+                PARED,
+                AUTOMATIC,
                 Constants.SENT,
                 Constants.MESSAGE_TEXT,
                 -new Date().getTime(),
                 ""
         );
     }
+    public static ChatMessage getBlockedMessage(){
+        return new ChatMessage(
+                BLOCKED,
+                AUTOMATIC,
+                Constants.SENT,
+                Constants.MESSAGE_TEXT,
+                -new Date().getTime(),
+                ""
+        );
+    }
+    public static ChatMessage getUnblockedMessage(){
+        return new ChatMessage(
+                UNBLOCKED,
+                AUTOMATIC,
+                Constants.SENT,
+                Constants.MESSAGE_TEXT,
+                -new Date().getTime(),
+                ""
+        );
+    }
+
 }
+

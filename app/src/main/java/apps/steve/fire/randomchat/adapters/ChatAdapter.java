@@ -26,8 +26,14 @@ import apps.steve.fire.randomchat.Constants;
 import apps.steve.fire.randomchat.R;
 import apps.steve.fire.randomchat.model.ChatMessage;
 import apps.steve.fire.randomchat.widgets.Emoji;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static android.support.v7.widget.StaggeredGridLayoutManager.TAG;
+import static apps.steve.fire.randomchat.model.ChatMessage.BLOCKED;
+import static apps.steve.fire.randomchat.model.ChatMessage.PARED;
+import static apps.steve.fire.randomchat.model.ChatMessage.UNBLOCKED;
+import static apps.steve.fire.randomchat.model.ChatMessage.WAITING;
 
 /**
  * Created by Steve on 23/07/2016.
@@ -39,11 +45,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<ChatMessage> chatMessages;
     private Context context;
     //public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("HH:mm");
-    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("h:mm a", Locale.US);
+    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("h:mm a", Locale.getDefault());
     private static String android_id = "ANDROID_ID_UNRESOLVED";
 
     private final int EMISOR_TEXT = 0, EMISOR_IMAGE = 1, EMISOR_VIDEO = 2, EMISOR_AUDIO = 3,
-    RECEPTOR_TEXT = 4, RECEPTOR_IMAGE= 5, RECEPTOR_VIDEO = 6, RECEPTOR_AUDIO = 7;
+    RECEPTOR_TEXT = 4, RECEPTOR_IMAGE= 5, RECEPTOR_VIDEO = 6, RECEPTOR_AUDIO = 7, AUTOMATIC_TEXT = 10;
 
     public ChatAdapter(List<ChatMessage> chatMessages, Context context) {
         Log.d(Constants.TAG, "ChatAdapter");
@@ -59,22 +65,29 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ChatMessage message = chatMessages.get(position);
 
         if (message.getAndroidID().equals(android_id)){
-            if (message.getMessageType().equals(Constants.MESSAGE_TEXT)){
-                return EMISOR_TEXT;
-            }else if(message.getMessageType().equals(Constants.MESSAGE_IMAGE)){
-                return EMISOR_IMAGE;
-            }else{
-                return RECEPTOR_TEXT;
+            switch (message.getMessageType()) {
+                case Constants.MESSAGE_TEXT:
+                    return EMISOR_TEXT;
+                case Constants.MESSAGE_IMAGE:
+                    return EMISOR_IMAGE;
+                default:
+                    return RECEPTOR_TEXT;
             }
         }else{
-            if (message.getMessageType().equals(Constants.MESSAGE_TEXT)){
-                return RECEPTOR_TEXT;
-            }else if(message.getMessageType().equals(Constants.MESSAGE_IMAGE)){
-                return RECEPTOR_IMAGE;
-            }else{
-                return RECEPTOR_TEXT;
+            if (message.getAndroidID().equals(ChatMessage.AUTOMATIC)){
+                return AUTOMATIC_TEXT;
+            }
+
+            switch (message.getMessageType()) {
+                case Constants.MESSAGE_TEXT:
+                    return RECEPTOR_TEXT;
+                case Constants.MESSAGE_IMAGE:
+                    return RECEPTOR_IMAGE;
+                default:
+                    return RECEPTOR_TEXT;
             }
         }
+
     }
 
     @Override
@@ -100,6 +113,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case RECEPTOR_IMAGE:
                 View v4 = inflater.inflate(R.layout.receptor_image, parent, false);
                 viewHolder = new ViewHolderReceptorImage(v4);
+                break;
+            case AUTOMATIC_TEXT:
+                View v5 = inflater.inflate(R.layout.item_automatic_text, parent, false);
+                viewHolder = new AutomaticTextHolder(v5);
                 break;
             default:
                 View v = inflater.inflate(R.layout.chat_user1_item, parent, false);
@@ -128,6 +145,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case RECEPTOR_IMAGE:
                 ViewHolderReceptorImage vh4 = (ViewHolderReceptorImage) holder;
                 vh4.bind(chatMessages.get(position), context);
+                break;
+            case AUTOMATIC_TEXT:
+                AutomaticTextHolder vh5 = (AutomaticTextHolder) holder;
+                vh5.bind(chatMessages.get(position), context);
                 break;
             default:
                 ViewHolderEmisor defaultHolder = (ViewHolderEmisor) holder;
@@ -172,7 +193,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_double_check));
                     break;
                 case Constants.SENT:
-                    imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check));
+                    imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check));//ic_check
                     break;
 
             }
@@ -226,7 +247,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_double_check));
                     break;
                 case Constants.SENT:
-                    imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check));
+                    imageViewMessageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check));//ic_check
                     break;
 
             }
@@ -244,13 +265,39 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         void bind(ChatMessage message, Context context){
-
-
             Glide.with(context)
                     .load(message.getMessageText()) // Uri of the picture
                     .placeholder(R.drawable.ic_whatshot_red_24dp)
                     .into(image);
             textViewTime.setText(SIMPLE_DATE_FORMAT.format(message.getMessageTime()));
+        }
+    }
+
+    public class AutomaticTextHolder extends RecyclerView.ViewHolder{
+        @BindView(R.id.message_text) TextView txtMessage;
+
+        public AutomaticTextHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+        void bind(ChatMessage message, Context context){
+            String automaticMessage = null;
+            switch (message.getMessageText()){
+                case WAITING:
+                    automaticMessage= context.getString(R.string.chat_state_waiting);
+                case PARED:
+                    automaticMessage= context.getString(R.string.message_automatic_pared);
+                    break;
+                case BLOCKED:
+                    automaticMessage = context.getString(R.string.message_automatic_blocked);
+                    break;
+                case UNBLOCKED:
+                    automaticMessage = context.getString(R.string.message_automatic_unblocked);
+                    break;
+                default:
+                    break;
+            }
+            txtMessage.setText(automaticMessage);
         }
     }
 

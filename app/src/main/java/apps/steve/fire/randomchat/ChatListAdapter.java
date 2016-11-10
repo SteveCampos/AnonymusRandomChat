@@ -114,7 +114,7 @@ public class ChatListAdapter extends BaseAdapter {
             if (message.getMessageStatus() == Constants.DELIVERED) {
                 holder2.messageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_double_checking));
             } else if (message.getMessageStatus() == Constants.SENT) {
-                holder2.messageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check));
+                holder2.messageStatus.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check));//ic_check
             }
 
 
