@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -17,7 +16,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
@@ -29,7 +27,6 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.google.android.gms.ads.AdRequest;
@@ -108,6 +105,10 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     private int countryId;
     private String chatState = Constants.CHAT_STATE_BLOCK;
 
+
+
+    private boolean isBack = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -167,6 +168,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume");
+        isBack = false;
         if (mAdView != null) {
             mAdView.resume();
         }
@@ -239,6 +241,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isBack= true;
                 finish();
             }
         });
@@ -337,11 +340,14 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         firebaseRoom.sendMessage(message);
     }
 
+    @Override
+    public void onBackPressed() {
+        isBack= true;
+        super.onBackPressed();
+    }
     private AppCompatActivity getActivity() {
         return this;
     }
-
-
     /**
      * Show or hide the emoji popup
      *
@@ -631,7 +637,9 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     @Override
     protected void onStop() {
         Log.d(TAG, "onStop");
-        firebaseRoom.setOff();
+        if (!isBack){
+            firebaseRoom.setOff();
+        }
         super.onStop();
     }
 
@@ -702,10 +710,11 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     @Override
     public void onRoomStateChanged(String state) {
         Log.d(TAG, "onRoomStateChanged state: " + state);
-        chatState = state;
         if (state == null) {
             return;
         }
+        chatState = state;
+
         String lastConnection = "";
         switch (state) {
             case Constants.CHAT_STATE_WAITING:

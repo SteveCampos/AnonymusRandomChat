@@ -126,7 +126,10 @@ public class ChatsFragment extends Fragment implements OnChatItemClickListener, 
     @Override
     public void onChatItemClicked(RandomChat item, View view, boolean liked) {
         //updateShortCut(item);
-        launchChatActivity(item, Constants._HERE);
+        if (listener!=null){
+            listener.onChatItemClicked(item);
+        }
+        //launchChatActivity(item, Constants._HERE);
     }
 
     @Override

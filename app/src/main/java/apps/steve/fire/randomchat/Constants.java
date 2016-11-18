@@ -42,7 +42,7 @@ public class Constants {
     public static final boolean CHAT_CREATED = true;
     public static final boolean CHAT_PARED = false;
 
-    public static enum Genero{CHICO, CHICA};
+    public enum Genero{CHICO, CHICA}
 
     public static final String STATE_ONLINE = "ONLINE";
     public static final String STATE_OFFLINE = "OFFLINE";

@@ -81,6 +81,9 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     private List<RandomChat> chatsHot = new ArrayList<>();
 
 
+    private boolean launchedChat = false;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
@@ -112,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume");
+        launchedChat= false;
         ButterKnife.bind(this);
         initViews();
         initFirebase();
@@ -163,7 +167,9 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     @Override
     protected void onStop() {
         Log.d(TAG, "onStop");
-        firebaseHelper.setOff();
+        if (!launchedChat){
+            firebaseHelper.setOff();
+        }
         super.onStop();
     }
 
@@ -241,7 +247,6 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
     }
 
     @Override
@@ -275,10 +280,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == android.R.id.home) {
+        if (id == android.R.id.home) {
             drawer.openDrawer(GravityCompat.START);
         }
         return super.onOptionsItemSelected(item);
@@ -454,6 +456,11 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     @Override
+    public void onChatItemClicked(RandomChat item) {
+        launchChatActivity(item, Constants._HERE);
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         Log.d(TAG, "onSaveInstanceState");
         outState.putInt("current_position", currentItem);
@@ -527,12 +534,27 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     private void launchChatActivity(int countryId, String key) {
+        launchedChat = true;
         Log.d(TAG, "launchChatActivity key: " + key);
         // first parameter is the context, second is the class of the activity to launch
         Intent i = new Intent(getActivity(), ChatActivity.class);
         // put "extras" into the bundle for access in the second activity
         i.putExtra("country_id", countryId);
         i.putExtra("key_random", key);
+        startActivity(i);
+    }
+    private void launchChatActivity(RandomChat item, String start_type) {
+        launchedChat = true;
+        // first parameter is the context, second is the class of the activity to launch
+        Intent i = new Intent(getActivity(), ChatActivity.class);
+        // put "extras" into the bundle for access in the second activity
+        i.putExtra("key_random", item.getKeyChat());
+        i.putExtra("country_id", item.getCountry().getCountryID());
+        i.putExtra("extra_unread", item.getNoReaded());
+        /*i.putExtra("start_type", start_type);
+        i.putExtra("android_id", historialChat.getMe().getKeyDevice());
+        i.putExtra("android_id_receptor", historialChat.getEmisor().getKeyDevice());*/
+        // brings up the second activity
         startActivity(i);
     }
 

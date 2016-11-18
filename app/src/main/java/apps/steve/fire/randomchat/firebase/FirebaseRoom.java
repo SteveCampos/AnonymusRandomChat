@@ -280,7 +280,7 @@ public class FirebaseRoom {
             blockChat.put(meRoomState, androidID + state);
 
             if (him != null){
-                String himRoomState = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key + "/" + Constants.CHILD_STATE + "/";;
+                String himRoomState = "/" + Constants.CHILD_USERS + "/" + him.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + key + "/" + Constants.CHILD_STATE + "/";
                 blockChat.put(himRoomState, androidID + state);
             }
         }
