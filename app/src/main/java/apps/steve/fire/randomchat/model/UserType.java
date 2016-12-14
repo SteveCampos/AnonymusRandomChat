@@ -5,4 +5,4 @@ package apps.steve.fire.randomchat.model;
  */
 public enum UserType {
     OTHER, SELF
-};
+}

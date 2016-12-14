@@ -27,7 +27,7 @@
                 android:paddingTop="5dp"
                 android:textStyle="bold"
                 android:textColor="@color/vimeo_blue"
-                android:text="Anonymus"
+                android:text="@string/chat_author_anonymus"
                 android:textSize="16sp" />
 
             <TextView

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import apps.steve.fire.randomchat.BuildConfig;
 import apps.steve.fire.randomchat.ChatActivity;
 import apps.steve.fire.randomchat.Constants;
 import apps.steve.fire.randomchat.R;
@@ -47,6 +48,7 @@ import apps.steve.fire.randomchat.model.User;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import saschpe.versioninfo.widget.VersionInfoDialogFragment;
 
 public class MainActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, NavigationView.OnNavigationItemSelectedListener, OnChatsListener, OnSearchListener, AdapterView.OnItemClickListener {
 
@@ -299,8 +301,21 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         switch (item.getItemId()) {
             case R.id.nav_main:
                 break;
+            case R.id.nav_credits:
+                showCredits();
+                break;
         }
         return true;
+    }
+
+    public void showCredits(){
+        VersionInfoDialogFragment
+                .newInstance(
+                        getString(R.string.app_name),
+                        BuildConfig.VERSION_NAME,
+                        getString(R.string.app_credits_content),
+                        R.mipmap.ic_launcher)
+                .show(getFragmentManager(), "version_info");
     }
 
     @OnClick(R.id.fab)

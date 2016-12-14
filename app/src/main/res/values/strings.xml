@@ -1,92 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Chat Anónimo</string>
+    <string name="app_name">Anonymus Chat</string>
+    <string name="nav_credits">Credits</string>
+    <string name="app_credits_content">Steve Campos\n
+                                Icons designed by Flaticon.\n\n
+                                Send Images coming…</string>
 
+
+    <string name="chat_author_anonymus">Anonymus</string>
 
     <string name="historial_action_chat">Chat</string>
     <string name="type_your_message">Enter msg</string>
     <string name="NoRecent">No recent</string>
     <string name="title_activity_search_chat">Random</string>
 
-    <string name="chat_state_writing">Escribiendo…</string>
-    <string name="chat_state_waiting">Esperando…</string>
-    <string name="chat_state_no_message">Sin mensajes</string>
-    <string name="chat_state_pared">Unidos</string>
-    <string name="chat_state_blocked">Blockeado</string>
+    <string name="chat_state_writing">Writing…</string>
+    <string name="chat_state_waiting">Waiting…</string>
+    <string name="chat_state_no_message">No messages</string>
+    <string name="chat_state_pared">Joined</string>
+    <string name="chat_state_blocked">Blocked</string>
 
-    <string name="article_emisor">Yo:</string>
-    <string name="article_boy">Él:</string>
-    <string name="article_girl">Ella:</string>
+    <string name="article_emisor">Me:</string>
+    <string name="article_boy">Him:</string>
+    <string name="article_girl">Her:</string>
 
-    <string name="last_connection">Hace %1$d %2$s</string>
+    <string name="last_connection">%1$d %2$s ago</string>
 
-    <string name="time_seconds">Segundos</string>
-    <string name="time_minutes">Minutos</string>
-    <string name="time_hours">Horas</string>
-    <string name="time_days">Días</string>
+    <string name="time_seconds">Seconds</string>
+    <string name="time_minutes">Minutes</string>
+    <string name="time_hours">Hours</string>
+    <string name="time_days">Days</string>
 
-    <string name="state_online">En línea</string>
+    <string name="state_online">Online</string>
 
 
     <string name="historial_action_like">%1$s</string>
     <string name="historial_action_error">%1$s error</string>
 
-    <string name="action_undo">Deshacer</string>
+    <string name="action_undo">Undo</string>
     <string name="action_hot">Hot</string>
-    <string name ="error">Error</string>
+    <string name="error">Error</string>
 
-    <string name="boy">Chico</string>
-    <string name="girl">Chica</string>
+    <string name="boy">Boy</string>
+    <string name="girl">Girl</string>
 
-    <string name="boy_age_group_1">Chico Joven</string>
-    <string name="boy_age_group_2">Hombre Joven</string>
-    <string name="boy_age_group_3">Hombre</string>
-    <string name="boy_age_group_4">Hombre Adulto</string>
-    <string name="girl_age_group_1">Chica Joven</string>
-    <string name="girl_age_group_2">Mujer Joven</string>
-    <string name="girl_age_group_3">Mujer</string>
-    <string name="girl_age_group_4">Mujer Adulta</string>
+    <string name="boy_age_group_1">Young Boy</string>
+    <string name="boy_age_group_2">Young Man</string>
+    <string name="boy_age_group_3">Man</string>
+    <string name="boy_age_group_4">Adult Man</string>
+    <string name="girl_age_group_1">Young Girl</string>
+    <string name="girl_age_group_2">Young Woman</string>
+    <string name="girl_age_group_3">Woman</string>
+    <string name="girl_age_group_4">Adult Woman</string>
 
     <string-array name="genero">
-        <item>Chico</item>
-        <item>Chica</item>
+        <item>Boy</item>
+        <item>Girl</item>
     </string-array>
 
-    <string-array name="query_suggestions">
-        <item>Android</item>
-        <item>iOS</item>
-        <item>SCALA</item>
-        <item>Ruby</item>
-        <item>JavaScript</item>
-    </string-array>
-
-    <string-array name="countries">
-        <item>Peru</item>
-        <item>España</item>
-        <item>Australia</item>
-        <item>Alemania</item>
-        <item>Francia</item>
-    </string-array>
 
     <string name="title_activity_upload_imge">UploadImage</string>
     <string name="action_settings">Settings</string>
-    <string name="action_block">Blockear</string>
-    <string name="action_unblock">Desblockear</string>
-    <string name="action_change_name">Cambiar Nombre</string>
+    <string name="action_block">Block</string>
+    <string name="action_unblock">Unlock</string>
+    <string name="action_change_name">Change Name</string>
 
-    <string name="message_automatic_pared">Unidos</string>
-    <string name="message_automatic_blocked">Blockeado</string>
+    <string name="message_automatic_pared">Joined</string>
+    <string name="message_automatic_blocked">Blocked</string>
 
-    <string name="message_automatic_unblocked">Desblockeado</string>
+    <string name="message_automatic_unblocked">Unblocked</string>
 
-    <string name="action_unblock_imposible">Sólo el que bloqueó el chat, puede desbloquearlo.</string>
+    <string name="action_unblock_imposible">Only the one that blocks the chat can unlock it.</string>
 
-
-    <string name="action_search">Search University</string>
 
     <string name="action_favorite">Star</string>
-    <string name="title_activity_navigation">NavigationActivity</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -96,13 +84,13 @@
 
     <!-- TODO: Remove or change this placeholder text -->
 
-    <string name="banner_top_ad_unit_id">ca-app-pub-7677000963765033/9663714103</string>
-    <string name="native_list_ad_unit_id">ca-app-pub-7677000963765033/2602838508</string>
+    <string name="banner_top_ad_unit_id" translatable="false">ca-app-pub-7677000963765033/9663714103</string>
+    <string name="native_list_ad_unit_id" translatable="false">ca-app-pub-7677000963765033/2602838508</string>
 
 
     <!--NOTIFICATION-->
-    <string name="notification_count_messages">%d nuevo(s) mensaje(s).</string>
-    <string name="notification_summary_messages">%1$d Chats %2$d nuevo(s) mensaje(s).</string>
+    <string name="notification_count_messages">%d new(s) message(s).</string>
+    <string name="notification_summary_messages">%1$d Chats %2$d new(s) message(s).</string>
 
     <!--LIST OF ALL COUNTRYIES -->
     <string name="country_abkhazia">Abkhazia</string>

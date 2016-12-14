@@ -5,6 +5,10 @@
             android:id="@+id/nav_main"
             android:icon="@drawable/ic_whatshot_red_24dp"
             android:title="@string/app_name" />
+        <item
+            android:id="@+id/nav_credits"
+            android:title="@string/nav_credits" />
+
     </group>
 
 

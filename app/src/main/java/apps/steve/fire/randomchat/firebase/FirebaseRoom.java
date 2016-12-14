@@ -399,10 +399,10 @@ public class FirebaseRoom {
             }
             messageReaded.put(to + "/noReaded", 0);
             messageReaded.put(to + "/lastMessage/messageStatus", Constants.READED);
-            messageReaded.put(to + "/lastMessage/messageTime", new Date().getTime());
+            messageReaded.put(to + "/lastMessage/messageTime", -new Date().getTime());
 
             messageReaded.put(toReceptor + "/lastMessage/messageStatus", Constants.READED);
-            messageReaded.put(toReceptor + "/lastMessage/messageTime", new Date().getTime());
+            messageReaded.put(toReceptor + "/lastMessage/messageTime", -new Date().getTime());
 
 //            messageReaded.put(notificationPath + "/status", Constants.READED);
 

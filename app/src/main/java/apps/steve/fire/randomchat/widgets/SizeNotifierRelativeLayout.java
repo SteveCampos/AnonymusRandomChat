@@ -14,8 +14,8 @@ public class SizeNotifierRelativeLayout extends RelativeLayout {
     private Rect rect = new Rect();
     public SizeNotifierRelativeLayoutDelegate delegate;
 
-    public abstract interface SizeNotifierRelativeLayoutDelegate {
-        public abstract void onSizeChanged(int keyboardHeight);
+    public interface SizeNotifierRelativeLayoutDelegate {
+        void onSizeChanged(int keyboardHeight);
     }
 
     public SizeNotifierRelativeLayout(Context context) {

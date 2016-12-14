@@ -130,6 +130,8 @@ public class ChatsHolder extends RecyclerView.ViewHolder {
             Drawable drawable = ContextCompat.getDrawable(mContext, drawableID);
 
             lastMessage.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+        }else{
+            lastMessage.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
         }
 
 
@@ -137,6 +139,9 @@ public class ChatsHolder extends RecyclerView.ViewHolder {
 
         if (item.isHot()){
             Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_whatshot_red_24dp);
+            time.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
+        }else{
+            Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_whatshot_white_24dp);
             time.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
         }
 
@@ -149,6 +154,9 @@ public class ChatsHolder extends RecyclerView.ViewHolder {
                 counterMessage = ""+item.getNoReaded();
                 counter.setBackgroundResource(R.drawable.badge_circle);
                 time.setTextColor(ContextCompat.getColor(mContext, R.color.vimeo_blue));
+            }else{
+                counter.setBackgroundResource(R.drawable.ic_whatshot_white_24dp);//Fondo blanco
+                time.setTextColor(ContextCompat.getColor(mContext, R.color.grey_600));
             }
         }
 
