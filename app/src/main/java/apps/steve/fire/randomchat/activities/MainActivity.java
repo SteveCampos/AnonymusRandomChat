@@ -385,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         new MaterialDialog.Builder(this)
                 .title(R.string.dialog_title_create_post)
                 .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE)
-                .input(R.string.dialog_input_create_post, R.string.dialog_post_prefill, new MaterialDialog.InputCallback() {
+                .input(R.string.dialog_input_create_post, R.string.dialog_post_prefill, false, new MaterialDialog.InputCallback() {
                     @Override
                     public void onInput(MaterialDialog dialog, CharSequence input) {
                         // Do something

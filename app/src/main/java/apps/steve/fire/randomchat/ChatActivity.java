@@ -247,8 +247,6 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     private void loadAds() {
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                .addTestDevice("7D610238E4AC96FE6016B6B6DF36209A")
-                .addTestDevice("6A4C8AA799F4A30921C02DC505824DC0")
                 .build();
         mAdView.loadAd(adRequest);
     }
@@ -395,66 +393,6 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
                 });
     }
 
-    /*
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        onResume();
-        Log.d(TAG, "requestCode: " + requestCode);
-        Log.d(TAG, "requestCode: " + requestCode);
-
-        if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
-            selectedImageUri = data.getData();
-
-            //progressBar.setVisibility(View.VISIBLE);
-
-            final long now = - new Date().getTime();
-
-            final ChatMessage uploadingMessage = new ChatMessage(
-                    "",
-                    androidID,
-                    Constants.SENT,
-                    Constants.MESSAGE_IMAGE,
-                    now,
-                    "");
-
-            chatAdapter.addMessage(uploadingMessage);
-
-
-            // Get a reference to store file at chat_photos/<FILENAME>
-            fireStorage.uploadFile(selectedImageUri, new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                            // When the image has successfully uploaded, we get its download URL
-                            Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                            if (downloadUrl != null){
-                                firebaseRoom.sendMessage(new ChatMessage(
-                                        downloadUrl.toString(),
-                                        androidID,
-                                        Constants.SENT,
-                                        Constants.MESSAGE_IMAGE,
-                                        now,
-                                        ""
-                                ));
-                            }
-                        }
-                    }, new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-
-                        }
-                    },
-                    new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Snackbar.make(toolbar, R.string.error, Snackbar.LENGTH_LONG).show();
-                            chatAdapter.removeMessage(uploadingMessage);
-                        }
-                    });
-        }
-    }
-    */
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -519,7 +457,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
         @Override
         public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-            Log.d(TAG, "onTextChanged chatEditText1.getText().toString(): " + chatEditText1.getText().toString());
+            //Log.d(TAG, "onTextChanged chatEditText1.getText().toString(): " + chatEditText1.getText().toString());
         }
 
         @Override

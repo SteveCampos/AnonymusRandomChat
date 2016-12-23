@@ -369,6 +369,7 @@ public class FirebaseRoom {
                 if (dataSnapshot == null){
                     return;
                 }
+                Log.d(TAG, "listenMessages dataSnapshot:  " + dataSnapshot);
 
                 Log.d(TAG, "There are " + dataSnapshot.getChildrenCount() + " messages");
                 messages.clear();

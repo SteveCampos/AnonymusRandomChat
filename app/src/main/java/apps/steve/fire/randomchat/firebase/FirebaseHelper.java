@@ -272,8 +272,12 @@ public class FirebaseHelper {
         this.listenerPosts = listenerP;
         Log.d(TAG, "createNewPost ...");
         String keyChat = "";
+        String keyMessagePost = "";
 
         keyChat = refPosts.push().getKey();
+        keyMessagePost = refPosts.child(keyChat).child("messages").push().getKey();
+
+        post.setKeyMessage(keyMessagePost);
 
         RandomChat chatRandom = new RandomChat();
         Emisor receptor = new Emisor();
@@ -326,10 +330,11 @@ public class FirebaseHelper {
     public void paredByPost(RandomChat randomChat, Emisor me, OnPostListener listener){
         this.listenerPosts = listener;
 
-        //final String keyPost = randomChat.getKeyChat();
+        ChatMessage postMessage = randomChat.getLastMessage();
         Emisor emisor = randomChat.getEmisor();
 
         final String keyChat = refUserChats.push().getKey();
+        String keyPostMessage = refPosts.push().getKey();
 
         randomChat.setReceptor(me);
         randomChat.setEstado(Constants.CHAT_STATE_PARED);
@@ -346,12 +351,25 @@ public class FirebaseHelper {
 
         Map<String, Object> updateNodes = new HashMap<>();
 
+
+        ChatMessage paredMessage = ChatMessage.getParedByPostMessage();
+
         updateNodes.put(pathToPared + "/emisor", emisor.toMap());
         updateNodes.put(pathToPared + "/receptor", me.toMap());
         updateNodes.put(pathToPared + "/estado", Constants.CHAT_STATE_PARED);
         updateNodes.put(pathToPared + "/action", Constants.CHAT_STATE_NO_ACTION);
         updateNodes.put(pathToPared + "/time", -new Date().getTime());
-        updateNodes.put(pathToPared + "/messages/"+ keyChat, ChatMessage.getParedByPostMessage().toMap());
+        updateNodes.put(pathToPared + "/messages/"+ keyChat + "/messageText", paredMessage.getMessageText());
+        updateNodes.put(pathToPared + "/messages/"+ keyChat + "/androidID", paredMessage.getAndroidID());
+        updateNodes.put(pathToPared + "/messages/"+ keyChat + "/messageStatus", paredMessage.getMessageStatus());
+        updateNodes.put(pathToPared + "/messages/"+ keyChat + "/messageType", paredMessage.getMessageType());
+        updateNodes.put(pathToPared + "/messages/"+ keyChat + "/messageTime", paredMessage.getMessageTime());
+
+        updateNodes.put(pathToPared + "/messages/"+ keyPostMessage + "/messageText", postMessage.getMessageText());
+        updateNodes.put(pathToPared + "/messages/"+ keyPostMessage + "/androidID", postMessage.getAndroidID());
+        updateNodes.put(pathToPared + "/messages/"+ keyPostMessage + "/messageStatus", postMessage.getMessageStatus());
+        updateNodes.put(pathToPared + "/messages/"+ keyPostMessage + "/messageType", postMessage.getMessageType());
+        updateNodes.put(pathToPared + "/messages/"+ keyPostMessage + "/messageTime", postMessage.getMessageTime());
 
 
         updateNodes.put(pathToHisto, randomChat.toHistoMap());
@@ -654,7 +672,6 @@ public class FirebaseHelper {
                         if (postSnapshot.getValue() != null){
                             Log.d(TAG, "CHILDREN KEY: " + postSnapshot.getKey());
                             Log.d(TAG, "postSnapshot"+ postSnapshot);
-
                             RandomChat chat = postSnapshot.getValue(RandomChat.class);
 //                            Log.d(TAG, "keyChat: " + chat.getKeyChat());
                             list.add(chat);

@@ -52,11 +52,23 @@ public class ChatsHolder extends RecyclerView.ViewHolder {
 
     public void bind(final RandomChat item, String androidID, Context mContext, final OnChatItemClickListener listener){
 
+        if (item == null){
+            return;
+        }
+
 
         time.setText(Utils.calculateLastConnection(new Date(Utils.abs(item.getLastMessage().getMessageTime())), new Date(), mContext));
 
         Emisor me = item.getEmisor();
+
         Emisor interlocutor = item.getReceptor();
+
+
+        if (me == null && interlocutor == null){
+            return;
+        }
+
+
         if (me != null){
             if (me.getKeyDevice()!= null){
                 if (androidID!=null){
