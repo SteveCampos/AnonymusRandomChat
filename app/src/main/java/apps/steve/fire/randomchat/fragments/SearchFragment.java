@@ -275,6 +275,8 @@ public class SearchFragment extends Fragment implements RangeBar.OnRangeBarChang
         Log.d(TAG, "SETTING PREFERENCES ...");
 
         Emisor prefEmisor = Utils.getEmisor(getActivity());
+        circledPickerEdad.setValue(prefEmisor.getEdad());
+
         genero = Constants.Genero.valueOf(prefEmisor.getGenero());
         emisorEdad = prefEmisor.getEdad();
         generoReceptor = Constants.Genero.valueOf(prefEmisor.getLooking().getGenero());

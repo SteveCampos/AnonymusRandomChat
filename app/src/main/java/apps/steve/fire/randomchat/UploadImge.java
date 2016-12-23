@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -32,8 +33,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import apps.steve.fire.randomchat.activities.FullImageActivity;
+import apps.steve.fire.randomchat.firebase.FirebaseStorageHelper;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import id.zelory.compressor.Compressor;
+import pl.aprilapps.easyphotopicker.DefaultCallback;
+import pl.aprilapps.easyphotopicker.EasyImage;
 
 public class UploadImge extends AppCompatActivity {
 
@@ -42,9 +48,10 @@ public class UploadImge extends AppCompatActivity {
     private static final String TAG = UploadImge.class.getSimpleName();
 
 
+    /*
     private FirebaseApp app;
     private FirebaseStorage storage;
-    private StorageReference storageRef;
+    private StorageReference storageRef;*/
 
     FloatingActionButton fab;
 
@@ -60,6 +67,8 @@ public class UploadImge extends AppCompatActivity {
     ProgressBar progressBar;
 
     private Uri selectedImageUri;
+    FirebaseStorageHelper fireStorage;
+    String androidID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,15 +77,17 @@ public class UploadImge extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
+        androidID = Settings.Secure.getString(this.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
         ButterKnife.bind(this);
         // Get the Firebase app and all primitives we'll use
+        /*
         app = FirebaseApp.getInstance();
         storage = FirebaseStorage.getInstance(app);
 
 
         // Get a reference to the location where we'll store our photos
-        storageRef = storage.getReference("chat_photos");
+        storageRef = storage.getReference("chat_photos");*/
 
         textview.setText("getCurrentTimeStamp() : " + getCurrentTimeStamp());
 
@@ -90,6 +101,13 @@ public class UploadImge extends AppCompatActivity {
             }
         });
         setProgressInvisible();
+
+    }
+
+    @Override
+    protected void onResume() {
+        fireStorage = new FirebaseStorageHelper(androidID);
+        super.onResume();
     }
 
     private void setProgressVisible(){
@@ -101,62 +119,136 @@ public class UploadImge extends AppCompatActivity {
 
 
     private void intentPickerImage(){
-
+        EasyImage.openGallery(this, 0);
+        /*
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/jpeg");
         intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-        startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
+        startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);*/
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
+            @Override
+            public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
+                //Some error handling
+                Toast.makeText(getActivity(), "Exception : "+ e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
+                //onPhotosReturned(imageFiles);
+                Toast.makeText(getActivity(), "onImagePicked : "+ imageFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                progressBar.setVisibility(View.VISIBLE);
+
+                Glide.with(getActivity())
+                        .load(imageFile) // Uri of the picture
+                        .into(imageView);
+
+                 File compressedImageFile = Compressor.getDefault(getActivity()).compressToFile(imageFile);
+
+                fireStorage.uploadFile(Uri.fromFile(compressedImageFile), new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                                // When the image has successfully uploaded, we get its download URL
+                                final Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                                // Set the download URL to the message box, so that the user can send it to the database
+                                textview.setText("URL IMAGE : \n" + downloadUrl.toString()
+                                        + "\nLastPathSegment : " + downloadUrl.getLastPathSegment());
+                                //begintoDownload(downloadUrl);
+                                progressBar.setVisibility(View.INVISIBLE);
+                                imageView.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        Intent intent = new Intent(getActivity(), FullImageActivity.class);
+                                        intent.setData(downloadUrl);
+                                        startActivity(intent);
+                                    }
+                                });
+                            }
+                        }, new OnProgressListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+
+                                Log.d(Constants.TAG, "getBytesTransferred : " + taskSnapshot.getBytesTransferred());
+                                Log.d(Constants.TAG, "getTotalByteCount : " + taskSnapshot.getTotalByteCount());
+                                progress = (100.0*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
+
+                                textview.setText(""+progress);
+                                progressBar.setProgress((int) progress);
+                            }
+                        },
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+
+                                Toast.makeText(getActivity(), "EXCEPTION : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+
+
+            @Override
+            public void onCanceled(EasyImage.ImageSource source, int type) {
+                //Cancel handling, you might wanna remove taken photo if it was canceled
+
+                Toast.makeText(getActivity(), "CANCELED", Toast.LENGTH_LONG).show();
+                /*if (source == EasyImage.ImageSource.CAMERA) {
+                    File photoFile = EasyImage.lastlyTakenButCanceledPhoto(MainActivity.this);
+                    if (photoFile != null) photoFile.delete();
+                }*/
+            }
+        });
     }
 
+    /*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
             selectedImageUri = data.getData();
-
-            // Get a reference to store file at chat_photos/<FILENAME>
-            final StorageReference photoRef = storageRef.child(selectedImageUri.getLastPathSegment());
 
             progressBar.setVisibility(View.VISIBLE);
 
             Glide.with(getActivity())
                     .load(selectedImageUri) // Uri of the picture
                     .into(imageView);
-
-            // Upload file to Firebase Storage
-            photoRef.putFile(selectedImageUri)
-                    .addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            // Get a reference to store file at chat_photos/<FILENAME>
+            fireStorage.uploadFile(selectedImageUri, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
                             // When the image has successfully uploaded, we get its download URL
                             Uri downloadUrl = taskSnapshot.getDownloadUrl();
                             // Set the download URL to the message box, so that the user can send it to the database
                             textview.setText("URL IMAGE : \n" + downloadUrl.toString()
                                     + "\nLastPathSegment : " + downloadUrl.getLastPathSegment());
-                            begintoDownload(downloadUrl);
+                            //begintoDownload(downloadUrl);
                             progressBar.setVisibility(View.INVISIBLE);
-
                         }
-                    }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                    //double progress = 100.0 * (taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                    }, new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
 
-                    Log.d(Constants.TAG, "getBytesTransferred : " + taskSnapshot.getBytesTransferred());
-                    Log.d(Constants.TAG, "getTotalByteCount : " + taskSnapshot.getTotalByteCount());
-                    progress = (100.0*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
+                            Log.d(Constants.TAG, "getBytesTransferred : " + taskSnapshot.getBytesTransferred());
+                            Log.d(Constants.TAG, "getTotalByteCount : " + taskSnapshot.getTotalByteCount());
+                            progress = (100.0*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
 
-                    textview.setText(""+progress);
-                    progressBar.setProgress((int) progress);
-                    /*Snackbar.make(fab, "Upload is " + progress + "% done", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();*/
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(getActivity(), "EXCEPTION : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                            textview.setText(""+progress);
+                            progressBar.setProgress((int) progress);
+                        }
+                    },
+                    new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            Toast.makeText(getActivity(), "EXCEPTION : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
         }
-    }
+    }*/
 
 
 
@@ -165,13 +257,14 @@ public class UploadImge extends AppCompatActivity {
         super.onSaveInstanceState(outState);
 
         // If there's an upload in progress, save the reference so you can query it later
-        if (storageRef != null) {
+        /*if (storageRef != null) {
             outState.putString("reference", storageRef.toString());
             outState.putDouble("progress", progress);
             outState.putParcelable("uri", selectedImageUri);
-        }
+        }*/
     }
 
+    /*
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -219,8 +312,8 @@ public class UploadImge extends AppCompatActivity {
                     progress = (100.0*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
                     progressBar.setProgress((int)progress);
                     textview.setText(""+progress);
-                    /*Snackbar.make(fab, "Upload is " + progress + "% done", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();*/
+                    Snackbar.make(fab, "Upload is " + progress  "% done", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -262,7 +355,7 @@ public class UploadImge extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(getActivity(), "ERROR AL DESCARGAR.", Toast.LENGTH_LONG).show();
         }
-    }
+    }*/
 
     private AppCompatActivity getActivity()
     {

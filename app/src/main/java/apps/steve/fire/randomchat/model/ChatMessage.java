@@ -20,6 +20,7 @@ public class ChatMessage {
 
     public final static String AUTOMATIC= "4650";
     public final static String PARED = "PARED";
+    public final static String PARED_BY_POST = "PARED_BY_POST";
     public final static String BLOCKED = "BLOCKED";
     public final static String UNBLOCKED = "UNBLOCKED";
     public final static String WAITING = "WAITING";
@@ -127,6 +128,18 @@ public class ChatMessage {
                 ""
         );
     }
+    public static ChatMessage getParedByPostMessage(){
+        return new ChatMessage(
+                PARED_BY_POST,
+                AUTOMATIC,
+                Constants.SENT,
+                Constants.MESSAGE_TEXT,
+                -new Date().getTime(),
+                ""
+        );
+    }
+
+
     public static ChatMessage getBlockedMessage(){
         return new ChatMessage(
                 BLOCKED,

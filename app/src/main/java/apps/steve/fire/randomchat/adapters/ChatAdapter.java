@@ -5,11 +5,15 @@ import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -24,14 +28,15 @@ import java.util.Locale;
 import apps.steve.fire.randomchat.AndroidUtilities;
 import apps.steve.fire.randomchat.Constants;
 import apps.steve.fire.randomchat.R;
+import apps.steve.fire.randomchat.interfaces.OnChatMessageListener;
 import apps.steve.fire.randomchat.model.ChatMessage;
 import apps.steve.fire.randomchat.widgets.Emoji;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static android.support.v7.widget.StaggeredGridLayoutManager.TAG;
 import static apps.steve.fire.randomchat.model.ChatMessage.BLOCKED;
 import static apps.steve.fire.randomchat.model.ChatMessage.PARED;
+import static apps.steve.fire.randomchat.model.ChatMessage.PARED_BY_POST;
 import static apps.steve.fire.randomchat.model.ChatMessage.UNBLOCKED;
 import static apps.steve.fire.randomchat.model.ChatMessage.WAITING;
 
@@ -51,12 +56,26 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int EMISOR_TEXT = 0, EMISOR_IMAGE = 1, EMISOR_VIDEO = 2, EMISOR_AUDIO = 3,
     RECEPTOR_TEXT = 4, RECEPTOR_IMAGE= 5, RECEPTOR_VIDEO = 6, RECEPTOR_AUDIO = 7, AUTOMATIC_TEXT = 10;
 
-    public ChatAdapter(List<ChatMessage> chatMessages, Context context) {
+    private OnChatMessageListener listener;
+
+    public ChatAdapter(List<ChatMessage> chatMessages, Context context, OnChatMessageListener listener) {
         Log.d(Constants.TAG, "ChatAdapter");
         this.chatMessages = chatMessages;
         this.context = context;
         android_id = Settings.Secure.getString(context.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
+        this.listener = listener;
+    }
+
+    public void addMessage(ChatMessage message){
+        this.chatMessages.add(message);
+        notifyItemInserted(getItemCount() - 1);
+    }
+
+    public void removeMessage(ChatMessage message){
+        int index = chatMessages.indexOf(message);
+        chatMessages.remove(index);
+        notifyItemRemoved(getItemCount() -1 );
     }
 
     @Override
@@ -77,7 +96,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (message.getAndroidID().equals(ChatMessage.AUTOMATIC)){
                 return AUTOMATIC_TEXT;
             }
-
             switch (message.getMessageType()) {
                 case Constants.MESSAGE_TEXT:
                     return RECEPTOR_TEXT;
@@ -224,14 +242,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ImageView imageView;
         TextView textViewMessageTime;
         ImageView imageViewMessageStatus;
+        RelativeLayout parentView;
+
         public ViewHolderEmisorImage(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.image_view);
             textViewMessageTime = (TextView) itemView.findViewById(R.id.time_text);
             imageViewMessageStatus = (ImageView) itemView.findViewById(R.id.user_reply_status);
+            parentView = (RelativeLayout) itemView.findViewById(R.id.parentView);
         }
 
-        void bind(ChatMessage message, Context context){
+        void bind(final ChatMessage message, Context context){
             Glide.with(context)
                     .load(message.getMessageText()) // Uri of the picture
                     .placeholder(R.drawable.ic_whatshot_white_24dp)
@@ -251,25 +272,41 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     break;
 
             }
+
+            parentView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    listener.onChatMessageListener(message);
+                }
+            });
         }
     }
 
     public class ViewHolderReceptorImage extends RecyclerView.ViewHolder{
         ImageView image;
         TextView textViewTime;
+        RelativeLayout parentView;
 
         public ViewHolderReceptorImage(View v) {
             super(v);
             image = (ImageView) v.findViewById(R.id.image_view);
             textViewTime = (TextView) v.findViewById(R.id.time_text);
+            parentView = (RelativeLayout) itemView.findViewById(R.id.parentView);
         }
 
-        void bind(ChatMessage message, Context context){
+        void bind(final ChatMessage message, Context context){
             Glide.with(context)
                     .load(message.getMessageText()) // Uri of the picture
                     .placeholder(R.drawable.ic_whatshot_red_24dp)
                     .into(image);
             textViewTime.setText(SIMPLE_DATE_FORMAT.format(message.getMessageTime()));
+            parentView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    listener.onChatMessageListener(message);
+                }
+            });
+
         }
     }
 
@@ -293,6 +330,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     break;
                 case UNBLOCKED:
                     automaticMessage = context.getString(R.string.message_automatic_unblocked);
+                    break;
+                case PARED_BY_POST:
+                    automaticMessage = context.getString(R.string.chat_state_pared_by_post);
                     break;
                 default:
                     break;

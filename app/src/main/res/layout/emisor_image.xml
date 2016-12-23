@@ -2,56 +2,72 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:paddingBottom="5dp"
-    android:paddingTop="5dp">
+    android:paddingTop="5dp"
+    android:id="@+id/parentView">
 
-    <apps.steve.fire.randomchat.widgets.ChatLayout
-        android:id="@+id/bubble"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginLeft="20dp"
-        android:layout_marginStart="20dp"
-        android:background="@drawable/balloon_emisor">
-
-        <ImageView
-            android:id="@+id/user_reply_status"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_alignBottom="@+id/message_text"
+        <apps.steve.fire.randomchat.widgets.ChatLayout
+            android:id="@+id/bubble"
+            android:layout_width="216dp"
+            android:layout_height="216dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_marginBottom="5dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
+            android:background="@drawable/balloon_emisor">
 
 
-            android:src="@drawable/ic_check"
-            android:visibility="visible" />
+            <ImageView
+                android:id="@+id/image_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_toLeftOf="@id/time_text"
+                android:scaleType="fitXY"
+                />
+            <LinearLayout
+                android:layout_alignParentBottom="true"
+                android:id="@+id/fullscreen_content_controls"
+                style="?metaButtonBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:background="@color/black_overlay"
+                android:gravity="end"
+                android:orientation="horizontal"
+                tools:ignore="UselessParent"
+                android:padding="8dp"
+                >
 
-        <TextView
-            android:id="@+id/time_text"
-            style="@style/chat_timings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/message_text"
+                <ImageView
+                    android:id="@+id/user_reply_status"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_alignBottom="@+id/message_text"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/ic_check"
+                    android:visibility="visible" />
 
-            android:layout_marginEnd="2dp"
-            android:layout_marginRight="2dp"
-            android:layout_toLeftOf="@id/user_reply_status"
-            android:layout_toStartOf="@id/user_reply_status"
-            android:paddingBottom="5dp"
-            android:text="17:10"
-            android:textColor="@color/cyan_A700" />
+                <TextView
+                    android:id="@+id/time_text"
+                    style="@style/chat_timings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/message_text"
 
-        <ImageView
-            android:id="@+id/image_view"
-            android:layout_width="172dp"
-            android:layout_height="172dp"
-            android:layout_toLeftOf="@id/time_text"
-            android:src="@drawable/common_google_signin_btn_icon_dark_normal" />
+                    android:layout_marginEnd="2dp"
+                    android:layout_marginRight="2dp"
+                    android:layout_toLeftOf="@id/user_reply_status"
+                    android:layout_toStartOf="@id/user_reply_status"
+                    android:paddingBottom="5dp"
+                    android:text="17:10"
+                    android:textColor="@color/white" />
 
+            </LinearLayout>
 
-    </apps.steve.fire.randomchat.widgets.ChatLayout>
-</RelativeLayout>
+        </apps.steve.fire.randomchat.widgets.ChatLayout>
+    </RelativeLayout>

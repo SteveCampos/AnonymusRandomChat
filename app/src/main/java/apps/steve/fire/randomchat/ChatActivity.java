@@ -2,13 +2,17 @@ package apps.steve.fire.randomchat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -27,25 +31,30 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import apps.steve.fire.randomchat.activities.FullImageActivity;
+import apps.steve.fire.randomchat.activities.MainActivity;
 import apps.steve.fire.randomchat.adapters.ChatAdapter;
 import apps.steve.fire.randomchat.firebase.FirebaseRoom;
+import apps.steve.fire.randomchat.firebase.FirebaseStorageHelper;
+import apps.steve.fire.randomchat.interfaces.OnChatMessageListener;
 import apps.steve.fire.randomchat.interfaces.OnRoomListener;
 import apps.steve.fire.randomchat.model.ChatMessage;
-import apps.steve.fire.randomchat.model.Chater;
 import apps.steve.fire.randomchat.model.Country;
 import apps.steve.fire.randomchat.model.Emisor;
 import apps.steve.fire.randomchat.widgets.Emoji;
@@ -53,12 +62,20 @@ import apps.steve.fire.randomchat.widgets.EmojiView;
 import apps.steve.fire.randomchat.widgets.SizeNotifierRelativeLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import id.zelory.compressor.Compressor;
 import me.leolin.shortcutbadger.ShortcutBadger;
+import pl.aprilapps.easyphotopicker.DefaultCallback;
+import pl.aprilapps.easyphotopicker.EasyImage;
+import pl.tajchert.nammu.Nammu;
+import pl.tajchert.nammu.PermissionCallback;
+
+import static apps.steve.fire.randomchat.R.id.imageView;
 
 
-public class ChatActivity extends AppCompatActivity implements SizeNotifierRelativeLayout.SizeNotifierRelativeLayoutDelegate, NotificationCenter.NotificationCenterDelegate, OnRoomListener {
+public class ChatActivity extends AppCompatActivity implements SizeNotifierRelativeLayout.SizeNotifierRelativeLayoutDelegate, NotificationCenter.NotificationCenterDelegate, OnRoomListener, OnChatMessageListener {
 
     private static final String TAG = ChatActivity.class.getSimpleName();
+    private static final int RC_PHOTO_PICKER = 144;
     //private EditText chatEditText1;
     private List<ChatMessage> chatMessages = new ArrayList<>();
     //private ImageView enterChatView1, emojiButton;
@@ -108,12 +125,20 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
 
     private boolean isBack = false;
+    private long lastConnection = 0;
+    private String connectionState = Constants.STATE_OFFLINE;
+
+
+    //Storage Firebase
+    FirebaseStorageHelper fireStorage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_chat);
 
+        Nammu.init(getApplicationContext());
         // Check whether we're recreating a previously destroyed instance
         if (savedInstanceState != null) {
             // Restore value of members from saved state
@@ -176,6 +201,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         ButterKnife.bind(this);
         firebaseRoom = new FirebaseRoom(countryId, keyRandom, androidID, this);
         firebaseRoom.setOn();
+        fireStorage = new FirebaseStorageHelper(androidID);
         initViews();
         super.onResume();
     }
@@ -229,7 +255,7 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
 
     private void setRecyclerView() {
         recycler.setLayoutManager(new LinearLayoutManager(this));
-        chatAdapter = new ChatAdapter(chatMessages, this);
+        chatAdapter = new ChatAdapter(chatMessages, this, this);
         recycler.setAdapter(chatAdapter);
     }
 
@@ -246,6 +272,188 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
             }
         });
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Nammu.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private void intentPickerImage(){
+        //EasyImage.openGallery(this, 0);
+
+        /**Permission check only required if saving pictures to root of sdcard*/
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            EasyImage.openGallery(this, 0);
+        } else {
+            Nammu.askForPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, new PermissionCallback() {
+                @Override
+                public void permissionGranted() {
+                    EasyImage.openGallery(ChatActivity.this, 0);
+                }
+                @Override
+                public void permissionRefused() {
+
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
+            @Override
+            public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
+                //Some error handling
+                Toast.makeText(getActivity(), "ERROR", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onImagePicked(File imageFile, EasyImage.ImageSource source, int type) {
+                onPicturesReturned(imageFile);
+            }
+
+
+            @Override
+            public void onCanceled(EasyImage.ImageSource source, int type) {
+                //Cancel handling, you might wanna remove taken photo if it was canceled
+            }
+        });
+    }
+
+    private void showFullPicture(Uri uri){
+        Intent intent = new Intent(getActivity(), FullImageActivity.class);
+        intent.setData(uri);
+        startActivity(intent);
+    }
+
+    private void onPicturesReturned(File imageFile) {
+        Snackbar.make(toolbar, R.string.action_sending, Snackbar.LENGTH_LONG).show();
+        //progressBar.setVisibility(View.VISIBLE);
+
+        final long now = - new Date().getTime();
+        File compressedImageFile = Compressor.getDefault(getActivity()).compressToFile(imageFile);
+
+        fireStorage.uploadFile(Uri.fromFile(compressedImageFile), new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+
+                        // When the image has successfully uploaded, we get its download URL
+                        final Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                        if(downloadUrl!= null){
+                            firebaseRoom.sendMessage(new ChatMessage(
+                                    downloadUrl.toString(),
+                                    androidID,
+                                    Constants.SENT,
+                                    Constants.MESSAGE_IMAGE,
+                                    now,
+                                    ""
+                            ));
+                        }
+
+                        // Set the download URL to the message box, so that the user can send it to the database
+                        /*textview.setText("URL IMAGE : \n" + downloadUrl.toString()
+                                + "\nLastPathSegment : " + downloadUrl.getLastPathSegment());
+                        //begintoDownload(downloadUrl);
+                        progressBar.setVisibility(View.INVISIBLE);*/
+
+                        /*imageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Intent intent = new Intent(getActivity(), FullImageActivity.class);
+                                intent.setData(downloadUrl);
+                                startActivity(intent);
+                            }
+                        });
+
+                        */
+                    }
+                }, new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+
+                        /*
+                        Log.d(Constants.TAG, "getBytesTransferred : " + taskSnapshot.getBytesTransferred());
+                        Log.d(Constants.TAG, "getTotalByteCount : " + taskSnapshot.getTotalByteCount());
+                        progress = (100.0*taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
+
+                        textview.setText(""+progress);
+                        progressBar.setProgress((int) progress);*/
+                    }
+                },
+                new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        Toast.makeText(getActivity(), "ERROR", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    /*
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        onResume();
+        Log.d(TAG, "requestCode: " + requestCode);
+        Log.d(TAG, "requestCode: " + requestCode);
+
+        if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
+            selectedImageUri = data.getData();
+
+            //progressBar.setVisibility(View.VISIBLE);
+
+            final long now = - new Date().getTime();
+
+            final ChatMessage uploadingMessage = new ChatMessage(
+                    "",
+                    androidID,
+                    Constants.SENT,
+                    Constants.MESSAGE_IMAGE,
+                    now,
+                    "");
+
+            chatAdapter.addMessage(uploadingMessage);
+
+
+            // Get a reference to store file at chat_photos/<FILENAME>
+            fireStorage.uploadFile(selectedImageUri, new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                            // When the image has successfully uploaded, we get its download URL
+                            Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                            if (downloadUrl != null){
+                                firebaseRoom.sendMessage(new ChatMessage(
+                                        downloadUrl.toString(),
+                                        androidID,
+                                        Constants.SENT,
+                                        Constants.MESSAGE_IMAGE,
+                                        now,
+                                        ""
+                                ));
+                            }
+                        }
+                    }, new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+
+                        }
+                    },
+                    new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Snackbar.make(toolbar, R.string.error, Snackbar.LENGTH_LONG).show();
+                            chatAdapter.removeMessage(uploadingMessage);
+                        }
+                    });
+        }
+    }
+    */
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -287,15 +495,23 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         @Override
         public void onClick(View v) {
 
-            if (v == enterChatView1) {
-                sendMessage(chatEditText1.getText().toString(), Constants.MESSAGE_TEXT);
+            if (!isWriting){
+                intentPickerImage();
+            }else{
+                if (v == enterChatView1) {
+                    sendMessage(chatEditText1.getText().toString(), Constants.MESSAGE_TEXT);
+                }
+                chatEditText1.setText("");
             }
 
-            chatEditText1.setText("");
+
+
+
 
         }
     };
 
+    private boolean isWriting;
     private final TextWatcher watcher1 = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
@@ -310,9 +526,11 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         public void afterTextChanged(Editable editable) {
             Log.d(TAG, "afterTextChanged editable.length(): " + editable.length());
             if (editable.length() == 0) {
-                enterChatView1.setImageResource(R.drawable.ic_chat_send);
+                isWriting = false;
+                enterChatView1.setImageResource(R.drawable.ic_insert_photo);
                 firebaseRoom.changeAction(Constants.CHAT_STATE_NO_ACTION);
             } else {
+                isWriting = true;
                 enterChatView1.setImageResource(R.drawable.ic_chat_send_active);
                 firebaseRoom.changeAction(androidID + Constants.CHAT_STATE_WRITING);
             }
@@ -698,6 +916,8 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
     @Override
     public void onReceptorConnectionChanged(String state, long lastConnection) {
         Log.d(TAG, "onReceptorConnectionChanged state: " + state + ", lastConnection: " + lastConnection);
+        this.lastConnection = lastConnection;
+        this.connectionState = state;
         if (textLastConnection != null) {
             if (state.equals(Constants.STATE_ONLINE)) {
                 textLastConnection.setText(R.string.state_online);
@@ -750,7 +970,11 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         if (action.equals(him.getKeyDevice() + Constants.CHAT_STATE_WRITING)) {
             textLastConnection.setText(R.string.chat_state_writing);
         } else if (action.equals(Constants.CHAT_STATE_NO_ACTION)) {
-            textLastConnection.setText(R.string.state_online);
+            if (connectionState.equals(Constants.STATE_ONLINE)) {
+                textLastConnection.setText(R.string.state_online);
+            } else {
+                textLastConnection.setText(Utils.calculateLastConnection(new Date(lastConnection), new Date(), getActivity()));
+            }
         }
     }
 
@@ -791,5 +1015,17 @@ public class ChatActivity extends AppCompatActivity implements SizeNotifierRelat
         menu.findItem(R.id.action_block).setTitle(titleBlock);
 
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public void onChatMessageListener(ChatMessage chatMessage) {
+        switch (chatMessage.getMessageType()){
+            case Constants.MESSAGE_IMAGE:
+                Intent intent = new Intent(getActivity(), FullImageActivity.class);
+                intent.setData(Uri.parse(chatMessage.getMessageText()));
+                startActivity(intent);
+                break;
+
+        }
     }
 }

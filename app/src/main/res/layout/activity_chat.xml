@@ -23,7 +23,6 @@
             android:elevation="4dp"
             android:theme="@style/ToolbarTheme"
             app:contentInsetLeft="8dp"
-
             app:contentInsetStart="8dp"
             app:popupTheme="@style/ToolbarTheme">
 
@@ -139,22 +138,9 @@
                     android:paddingLeft="13dp"
                     android:paddingRight="17dp"
                     android:paddingStart="13dp"
-                    android:src="@drawable/ic_chat_send" />
+                    android:src="@drawable/ic_insert_photo" />
 
             </RelativeLayout>
         </LinearLayout>
-
-    <!--
-    <ListView
-        android:id="@+id/chat_list_view"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:divider="@drawable/chat_divider"
-        android:layout_width="match_parent"
-        android:scrollbarStyle="outsideOverlay"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/my_toolbar"
-        android:layout_above="@+id/bottomlayout"></ListView>-->
-
 
 </apps.steve.fire.randomchat.widgets.SizeNotifierRelativeLayout>

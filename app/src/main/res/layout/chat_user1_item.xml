@@ -41,7 +41,8 @@
                 android:autoLink="web"
                 android:maxWidth="280dp"
                 android:text="Rahul Agrawal is a good boy but he does not know what he wants."
-                android:textColor="@color/blue_grey_900" />
+                android:textColor="@color/blue_grey_900"
+                android:textIsSelectable="true" />
 
         </LinearLayout>
 

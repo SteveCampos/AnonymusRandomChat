@@ -1,6 +1,7 @@
 package apps.steve.fire.randomchat.interfaces;
 
 import java.util.List;
+import java.util.Random;
 
 import apps.steve.fire.randomchat.model.HistorialChat;
 import apps.steve.fire.randomchat.model.RandomChat;
@@ -14,4 +15,5 @@ public interface OnChatsListener {
     void onChatsHotListener(boolean success, List<RandomChat> chatList);
     void onLoadMore();
     void onChatItemClicked(RandomChat item);
+    void onPostsListener(boolean success, List<RandomChat> posts);
 }

@@ -303,7 +303,7 @@ public class Utils {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         emisor.setEdad(preferences.getInt("emisorEdad",18));
         emisor.setGenero(preferences.getString("emisorGenero", Constants.Genero.CHICO.toString()));
-        emisor.setKeyDevice(preferences.getString("emisorKeyDevice", "emisorKeyDevice"));
+        emisor.setKeyDevice(preferences.getString("emisorKeyDevice", get_android_id(context)));
         Looking looking = new Looking(
                 preferences.getInt("lookingEdadMin",18),
                 preferences.getInt("lookingEdadMax",48),

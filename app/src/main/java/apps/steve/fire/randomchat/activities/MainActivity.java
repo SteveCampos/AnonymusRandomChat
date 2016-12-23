@@ -1,5 +1,6 @@
 package apps.steve.fire.randomchat.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -16,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -23,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.ArrayList;
@@ -33,14 +36,18 @@ import apps.steve.fire.randomchat.BuildConfig;
 import apps.steve.fire.randomchat.ChatActivity;
 import apps.steve.fire.randomchat.Constants;
 import apps.steve.fire.randomchat.R;
+import apps.steve.fire.randomchat.UploadImge;
 import apps.steve.fire.randomchat.Utils;
 import apps.steve.fire.randomchat.adapters.CountryAutocompleteAdapter;
 import apps.steve.fire.randomchat.adapters.MyFragmentAdapter;
 import apps.steve.fire.randomchat.firebase.FirebaseHelper;
 import apps.steve.fire.randomchat.fragments.ChatsFragment;
+import apps.steve.fire.randomchat.fragments.PostsFragment;
 import apps.steve.fire.randomchat.fragments.SearchFragment;
 import apps.steve.fire.randomchat.interfaces.OnChatsListener;
+import apps.steve.fire.randomchat.interfaces.OnPostListener;
 import apps.steve.fire.randomchat.interfaces.OnSearchListener;
+import apps.steve.fire.randomchat.model.ChatMessage;
 import apps.steve.fire.randomchat.model.Connection;
 import apps.steve.fire.randomchat.model.Country;
 import apps.steve.fire.randomchat.model.RandomChat;
@@ -50,7 +57,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import saschpe.versioninfo.widget.VersionInfoDialogFragment;
 
-public class MainActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, NavigationView.OnNavigationItemSelectedListener, OnChatsListener, OnSearchListener, AdapterView.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, NavigationView.OnNavigationItemSelectedListener, OnChatsListener, OnSearchListener, AdapterView.OnItemClickListener, OnPostListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     @BindView(R.id.toolbar)
@@ -81,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     private List<RandomChat> chats = new ArrayList<>();
     private List<RandomChat> chatsHot = new ArrayList<>();
+    private List<RandomChat> posts = new ArrayList<>();
 
 
     private boolean launchedChat = false;
@@ -242,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         adapter.addFragment(SearchFragment.newInstance(), getString(R.string.title_activity_search_chat));
         adapter.addFragment(ChatsFragment.newInstance(androidID, ChatsFragment.TYPE_ALL), getString(R.string.title_activity_historial));
         adapter.addFragment(ChatsFragment.newInstance(androidID, ChatsFragment.TYPE_HOTS), getString(R.string.title_activity_hots));
+        adapter.addFragment(PostsFragment.newInstance(androidID), getString(R.string.title_activity_posts));
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(currentItem);
     }
@@ -259,10 +268,23 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
             case 0:
                 break;
             case 1:
-                getChatsFragment().setData(chats);
+                ChatsFragment fragment = getChatsFragment();
+                if (fragment != null && chats != null){
+                    fragment.setData(chats);
+                }
                 break;
             case 2:
-                getHotsFragment().setData(chatsHot);
+                ChatsFragment hotFragment = getHotsFragment();
+                if (hotFragment != null && chatsHot != null){
+                    getHotsFragment().setData(chatsHot);
+                }
+                break;
+            case 3:
+                Log.d(TAG, "Post");
+                PostsFragment postFragment = getPostsFragment();
+                if (postFragment != null && posts != null){
+                    getPostsFragment().setData(posts);
+                }
                 break;
         }
     }
@@ -289,11 +311,11 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     @Override
+    // TODO: handle navigation
     public boolean onNavigationItemSelected(MenuItem item) {
         Log.d(TAG, "onNavigationItemSelected item.getItemId(): " + item.getItemId());
         // Set item in checked state
         item.setChecked(true);
-        // TODO: handle navigation
         // Closing drawer on item click
         drawer.closeDrawers();
 
@@ -304,6 +326,9 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
             case R.id.nav_credits:
                 showCredits();
                 break;
+            /*case R.id.nav_upload_image:
+                startActivity(new Intent(this, UploadImge.class));
+                break;*/
         }
         return true;
     }
@@ -330,20 +355,64 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
             searchFragment.startChat();
         }
 
-        firebaseHelper.startChat(this);
+        if(currentItem == 0 || currentItem == 1 || currentItem == 2 ){
+            firebaseHelper.startChat(this);
+        }
 
-        /*
+
+
         switch (currentItem){
             //SEARCH FRAGMENT
+            /*
             case 0:
+                firebaseHelper.startChat(this);
                 break;
             case 1:
+                firebaseHelper.startChat(this);
                 break;
             case 2:
+                firebaseHelper.startChat(this);
+                break;*/
+            case 3:
+                showDialogNewPost();
+                Log.d(TAG, "Posts");
                 break;
         }
-        */
+
     }
+
+    private void showDialogNewPost(){
+        new MaterialDialog.Builder(this)
+                .title(R.string.dialog_title_create_post)
+                .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE)
+                .input(R.string.dialog_input_create_post, R.string.dialog_post_prefill, new MaterialDialog.InputCallback() {
+                    @Override
+                    public void onInput(MaterialDialog dialog, CharSequence input) {
+                        // Do something
+                        Snackbar.make(toolbar, R.string.action_creating_post, Snackbar.LENGTH_LONG).show();
+                        firebaseHelper.createNewPost(
+                                Utils.getEmisor(getActivity()),
+                                new ChatMessage(
+                                        input.toString(),
+                                        androidID,
+                                        Constants.SENT,
+                                        Constants.MESSAGE_TEXT,
+                                        -new Date().getTime(),
+                                        "2325"
+                                ),
+                                MainActivity.this);
+                        dialog.dismiss();
+                    }
+                })
+                .dismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                stopAnim();
+            }
+        }).show();
+
+    }
+
 
     private SearchFragment getSearchFragment() {
 
@@ -369,7 +438,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
             Log.d(TAG, "getSupportFragmentManager().getFragments().size(): " + fragments.size());
             for (int i = 0; i < fragments.size(); i++) {
                 Log.d(TAG, "FRAGMENT: " + i);
-                if ((fragments.get(i) instanceof SearchFragment || fragments.get(i) instanceof ChatsFragment)) {
+                if ((fragments.get(i) instanceof SearchFragment || fragments.get(i) instanceof ChatsFragment || fragments.get(i) instanceof PostsFragment)) {
                     fragmentsClean.add(fragments.get(i));
                 }
 
@@ -399,6 +468,22 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
             return null;
         }
 
+    }
+
+    private PostsFragment getPostsFragment() {
+        List<Fragment> fragments = getFragments();
+        if (fragments != null) {
+
+            for (Fragment f: fragments) {
+                if (f instanceof PostsFragment){
+                    return (PostsFragment) f;
+                }
+            }
+        } else {
+            return null;
+        }
+
+        return null;
     }
 
     private ChatsFragment getHotsFragment() {
@@ -454,6 +539,13 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     @Override
+    public void onPostItemClicked(RandomChat item, View v, boolean bool) {
+        Log.d(TAG, "onPostItemClicked");
+        startAnim();
+        firebaseHelper.paredByPost(item, Utils.getEmisor(getActivity()), this);
+    }
+
+    @Override
     public void onLoadMore() {
         switch (currentItem) {
             case 0:
@@ -465,14 +557,42 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
                 //send List<> Hots
                 Log.d(TAG, "currentItem: " + 1);
                 break;
+            case 2:
+                firebaseHelper.incrementHotsLimit(20);
+                break;
+            case 3:
+                firebaseHelper.incrementPostLimit(20);
+                break;
             default:
                 break;
         }
     }
 
     @Override
+    public void onPostCreated() {
+        stopAnim();
+        Snackbar.make(toolbar, R.string.post_created, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
     public void onChatItemClicked(RandomChat item) {
         launchChatActivity(item, Constants._HERE);
+    }
+
+    @Override
+    public void onPostsListener(boolean success, List<RandomChat> posts) {
+        Log.d(TAG, "onChatsHotListener success: " + success);
+
+        if (posts == null) {
+            return;
+        }
+
+        this.posts = posts;
+
+        PostsFragment postFragment = getPostsFragment();
+        if (success && postFragment != null) {
+            postFragment.setData(posts);
+        }
     }
 
     @Override

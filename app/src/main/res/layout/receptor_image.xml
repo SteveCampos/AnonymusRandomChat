@@ -1,10 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingBottom="5dp"
+    android:paddingTop="5dp"
+    android:id="@+id/parentView">
 
+    <RelativeLayout
+        android:id="@+id/bubble"
+        android:layout_width="216dp"
+        android:layout_height="216dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
+        android:background="@drawable/balloon_receptor">
+
+
+
+
+        <ImageView
+            android:id="@+id/image_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:layout_centerInParent="true"
+            />
+
+        <TextView
+            android:id="@+id/chat_company_reply_author"
+            style="?metaButtonBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp"
+            android:paddingRight="8dp"
+            android:paddingTop="5dp"
+            android:text="@string/chat_author_anonymus"
+            android:textColor="@color/blue_grey_800"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_alignParentBottom="true"
+            style="?metaButtonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:background="@color/black_overlay"
+            android:gravity="start"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            >
+
+            <ImageView
+                android:id="@+id/user_reply_status"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:src="@drawable/ic_check" />
+
+            <TextView
+                android:id="@+id/time_text"
+                style="@style/chat_timings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="2dp"
+                android:layout_marginRight="2dp"
+                android:paddingBottom="5dp"
+                android:text="17:10"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+</RelativeLayout>
+<!--
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingBottom="5dp"
-
+    android:id="@+id/parentView"
     android:paddingTop="5dp">
 
     <RelativeLayout
@@ -33,12 +108,12 @@
 
             <ImageView
                 android:id="@+id/image_view"
-                android:layout_width="172dp"
-                android:layout_height="172dp"
-                android:layout_centerVertical="true"
+                android:layout_width="192dp"
+                android:layout_height="192dp"
                 android:layout_marginLeft="20dp"
-                android:maxWidth="280dp"
-                android:src="@drawable/common_google_signin_btn_icon_dark_normal" />
+                android:src="@drawable/boy_1"
+                android:scaleType="fitXY"
+                />
 
         </LinearLayout>
 
@@ -57,4 +132,4 @@
 
     </RelativeLayout>
 
-</RelativeLayout>
+</RelativeLayout>-->

@@ -19,13 +19,16 @@ import java.util.List;
 import java.util.Map;
 
 import apps.steve.fire.randomchat.Constants;
+import apps.steve.fire.randomchat.R;
 import apps.steve.fire.randomchat.Utils;
 import apps.steve.fire.randomchat.interfaces.OnChatsListener;
+import apps.steve.fire.randomchat.interfaces.OnPostListener;
 import apps.steve.fire.randomchat.interfaces.OnSearchListener;
 import apps.steve.fire.randomchat.model.ChatMessage;
 import apps.steve.fire.randomchat.model.Connection;
 import apps.steve.fire.randomchat.model.Country;
 import apps.steve.fire.randomchat.model.Emisor;
+import apps.steve.fire.randomchat.model.Notification;
 import apps.steve.fire.randomchat.model.RandomChat;
 import apps.steve.fire.randomchat.model.User;
 
@@ -45,10 +48,10 @@ public class FirebaseHelper {
     private DatabaseReference refUsers;
     private DatabaseReference refUserChats;
     private DatabaseReference refCountries;
-
+    private DatabaseReference refPosts;
     private OnSearchListener listener;
-
     private OnChatsListener listenerChats;
+    private OnPostListener listenerPosts;
 
     private String androidID;
 
@@ -56,15 +59,18 @@ public class FirebaseHelper {
     private ValueEventListener nodeRandoms;
     private ValueEventListener chatsListener;
     private ValueEventListener chatsHotListener;
-
+    private ValueEventListener postsListener;
 
     private Context context;
     private Query queryChats;
     private Query queryChatsHot;
+    private Query queryPosts;
 
     private Country country;
 
     private int limit = 20;
+    private int limitHots = 20;
+    private int limitPost = 20;
 
     //private static boolean isPersisted = false;
 
@@ -85,6 +91,16 @@ public class FirebaseHelper {
         listenChats();
     }
 
+    public void incrementHotsLimit(int limit){
+        this.limitHots += limit;
+        listenChatsHot();
+    }
+
+    public void incrementPostLimit(int limit){
+        this.limitPost += limit;
+        listenPosts();
+    }
+
     public Country getCountry() {
         return country;
     }
@@ -92,9 +108,11 @@ public class FirebaseHelper {
     public void setCountry(Country country) {
         this.country = country;
         this.refRandoms = refCountries.child(country.getNameID()).child(Constants.CHILD_RANDOMS);
+        this.refPosts = refCountries.child(country.getNameID()).child(Constants.CHILD_POSTS);
         this.refWaiting = refRandoms.child(Constants.CHAT_STATE_WAITING);
         //refRandoms.keepSynced(false);
         refWaiting.keepSynced(true);
+        listenPosts();
     }
 
     public void createUser(String id, User user) {
@@ -249,6 +267,116 @@ public class FirebaseHelper {
 
         queryWaiting.addListenerForSingleValueEvent(nodeRandoms);
     }
+
+    public void createNewPost(final Emisor me, ChatMessage post, OnPostListener listenerP){
+        this.listenerPosts = listenerP;
+        Log.d(TAG, "createNewPost ...");
+        String keyChat = "";
+
+        keyChat = refPosts.push().getKey();
+
+        RandomChat chatRandom = new RandomChat();
+        Emisor receptor = new Emisor();
+
+        chatRandom.setEmisor(me);
+        chatRandom.setReceptor(receptor);
+        chatRandom.setEstado(RandomChat.WAITING);
+        chatRandom.setSearch(me.getGenero()+"_LOOKING_"+me.getLooking().getGenero());
+        chatRandom.setAction(Constants.CHAT_STATE_NO_ACTION);
+        chatRandom.setTime(-new Date().getTime());
+
+        chatRandom.setKeyChat(keyChat);
+        chatRandom.setNoReaded(0);
+        chatRandom.setHot(false);
+        chatRandom.setLastMessage(post);
+        chatRandom.setCountry(country);
+
+
+        Log.d(TAG, "KEY CHAT : " + keyChat);
+
+        //String pathToHisto = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + keyChat;
+        //String pathToPared = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_PARED + "/" + keyChat;
+        //String pathToWaiting = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_WAITING + "/" + keyChat;
+        String pathToPost = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_POSTS  + "/" + keyChat;
+
+
+        Map<String, Object> chat = new HashMap<>();
+
+        //chat.put(pathToWaiting, chatRandom.toMap());
+        chat.put(pathToPost, chatRandom.toHistoMap());
+        //chat.put(pathToPared, chatRandom.toHistoMap());
+        //chat.put(pathToHisto, chatRandom.toHistoMap());
+
+
+        final String finalKeyChat = keyChat;
+        firebaseDatabase.getReference().updateChildren(chat, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    Log.d(TAG, "createNewChat databaseError: " + databaseError.getMessage());
+                    listenerPosts.onFailed(databaseError.getMessage());
+                } else {
+                    Log.d(TAG, "createNewChat SUCCESS: " + true);
+                    listenerPosts.onPostCreated();
+                }
+            }
+        });
+    }
+
+    public void paredByPost(RandomChat randomChat, Emisor me, OnPostListener listener){
+        this.listenerPosts = listener;
+
+        //final String keyPost = randomChat.getKeyChat();
+        Emisor emisor = randomChat.getEmisor();
+
+        final String keyChat = refUserChats.push().getKey();
+
+        randomChat.setReceptor(me);
+        randomChat.setEstado(Constants.CHAT_STATE_PARED);
+        randomChat.setAction(Constants.CHAT_STATE_NO_ACTION);
+        randomChat.setTime(- new Date().getTime());
+        randomChat.setLastMessage(ChatMessage.getParedByPostMessage());
+        randomChat.setKeyChat(keyChat);
+
+        String pathToPared = "/" + Constants.CHILD_COUNTRIES + "/" + country.getNameID() + "/" +  Constants.CHILD_RANDOMS + "/"+ Constants.CHAT_STATE_PARED + "/" + keyChat;
+        String pathToHisto = "/" + Constants.CHILD_USERS + "/" + me.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + keyChat;
+        String pathToHistoEmisor = "/" + Constants.CHILD_USERS + "/" + emisor.getKeyDevice() + "/" + Constants.CHILD_USERS_HISTO_CHATS + "/" + keyChat;
+        String notificationPath = "/" + Constants.CHILD_NOTIFICATIONS + "/" + keyChat;
+
+
+        Map<String, Object> updateNodes = new HashMap<>();
+
+        updateNodes.put(pathToPared + "/emisor", emisor.toMap());
+        updateNodes.put(pathToPared + "/receptor", me.toMap());
+        updateNodes.put(pathToPared + "/estado", Constants.CHAT_STATE_PARED);
+        updateNodes.put(pathToPared + "/action", Constants.CHAT_STATE_NO_ACTION);
+        updateNodes.put(pathToPared + "/time", -new Date().getTime());
+        updateNodes.put(pathToPared + "/messages/"+ keyChat, ChatMessage.getParedByPostMessage().toMap());
+
+
+        updateNodes.put(pathToHisto, randomChat.toHistoMap());
+        updateNodes.put(pathToHistoEmisor, randomChat.toHistoMap());
+
+        updateNodes.put(notificationPath, new Notification(me.getKeyDevice(), emisor.getKeyDevice(), context.getString(R.string.message_say_hi), country.getCountryID(), keyChat, me.getGenero(), Constants.SENT).toMap());
+
+        firebaseDatabase.getReference().updateChildren(updateNodes, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                Log.d(TAG, "DatabaseReference : " + databaseReference);
+                if (databaseError != null) {
+                    //HUBO UN PUTO ERROR
+                    Log.d(TAG, "updateReceptor, databaseError : " + databaseError.getMessage());
+                    listenerPosts.onFailed(databaseError.getMessage());
+                    //readNodeRandoms();
+                } else {
+                    //ON SUCCESS.
+                    listenerPosts.onChatLaunched(country.getCountryID(), keyChat);
+                }
+            }
+        });
+
+    }
+
 
     private void createNewChat(final Emisor me) {
         Log.d(TAG, "createNewChat ...");
@@ -462,19 +590,24 @@ public class FirebaseHelper {
     }
 
     private void listenChatsHot() {
-        queryChatsHot = refUserChats.orderByChild("hot").equalTo(true);
+        queryChatsHot = refUserChats.orderByChild("hot").equalTo(true).limitToFirst(limitHots);
         chatsHotListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot == null){
+                    return;
+                }
+
                 Log.d(TAG, "listenChatsHot DataSnapshot COUNT: " + dataSnapshot.getChildrenCount());
                 List<RandomChat> list = new ArrayList<>();
                 if (dataSnapshot.getChildrenCount() > 0) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        Log.d(TAG, "CHILDREN KEY: " + postSnapshot.getKey());
-
-                        RandomChat chat = postSnapshot.getValue(RandomChat.class);
-                        Log.d(TAG, chat.getKeyChat());
-                        list.add(chat);
+                        if (postSnapshot.getValue() != null){
+                            Log.d(TAG, "CHILDREN KEY: " + postSnapshot.getKey());
+                            RandomChat chat = postSnapshot.getValue(RandomChat.class);
+                            //Log.d(TAG, "keyChat : " + chat.getKeyChat());
+                            list.add(chat);
+                        }
                     }
                 }
 
@@ -508,16 +641,24 @@ public class FirebaseHelper {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
+
+                if (dataSnapshot == null) {
+                    return;
+                }
+
                 Log.d(TAG, "DataSnapshot COUNT: " + dataSnapshot.getChildrenCount());
 
                 List<RandomChat> list = new ArrayList<>();
                 if (dataSnapshot.getChildrenCount() > 0) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        Log.d(TAG, "CHILDREN KEY: " + postSnapshot.getKey());
+                        if (postSnapshot.getValue() != null){
+                            Log.d(TAG, "CHILDREN KEY: " + postSnapshot.getKey());
+                            Log.d(TAG, "postSnapshot"+ postSnapshot);
 
-                        RandomChat chat = postSnapshot.getValue(RandomChat.class);
-                        Log.d(TAG, chat.getKeyChat());
-                        list.add(chat);
+                            RandomChat chat = postSnapshot.getValue(RandomChat.class);
+//                            Log.d(TAG, "keyChat: " + chat.getKeyChat());
+                            list.add(chat);
+                        }
                     }
                 }
 
@@ -538,6 +679,51 @@ public class FirebaseHelper {
             }
         };
         queryChats.addValueEventListener(chatsListener);
+    }
+
+    private void listenPosts(){
+        queryPosts = refPosts.orderByChild("time").limitToFirst(limitPost);
+        postsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+
+                if (dataSnapshot == null){
+                    return;
+                }
+
+                Log.d(TAG, "DataSnapshot COUNT: " + dataSnapshot.getChildrenCount());
+
+                List<RandomChat> list = new ArrayList<>();
+                if (dataSnapshot.getChildrenCount() > 0) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        if (postSnapshot.getValue() != null){
+                            Log.d(TAG, "CHILDREN KEY: " + postSnapshot.getKey());
+                            RandomChat chat = postSnapshot.getValue(RandomChat.class);
+                            Log.d(TAG, "chat: "+ chat.getKeyChat());
+                            list.add(chat);
+                        }
+                    }
+                }
+
+                if (listenerChats!=null){
+                    listenerChats.onPostsListener(list.size()>0, list);
+                }
+
+                //setRecyclerView(list);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                if (listenerChats!=null){
+                    listenerChats.onPostsListener(false, null);
+                }
+                //Toast.makeText(Historial.this, "DatabaseError: "+ databaseError, Toast.LENGTH_SHORT).show();
+            }
+        };
+        queryPosts.addValueEventListener(postsListener);
     }
 
     public void setOff(){

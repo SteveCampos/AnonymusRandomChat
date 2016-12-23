@@ -148,6 +148,10 @@ public class FirebaseRoom {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "stateListener dataSnapshot: " + dataSnapshot);
                 if (dataSnapshot != null) {
+                    if (dataSnapshot.getValue() == null){
+                        return;
+                    }
+
                     state = dataSnapshot.getValue(String.class);
                     listener.onRoomStateChanged(state);
                 }
@@ -163,6 +167,9 @@ public class FirebaseRoom {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "actionListener dataSnapshot: " + dataSnapshot);
                 if (dataSnapshot != null) {
+                    if (dataSnapshot.getValue() == null){
+                        return;
+                    }
                     action = dataSnapshot.getValue(String.class);
                     listener.onRoomActionChanged(action);
                 }
@@ -251,7 +258,10 @@ public class FirebaseRoom {
     }
 
     public void changeAction(String action) {
-        actionReference.setValue(action);
+
+        Map<String, Object> mapAction = new HashMap<>();
+        mapAction.put("action", action);
+        roomReference.updateChildren(mapAction);
     }
 
     private String getStringofArray(List<String> list) {
@@ -333,8 +343,13 @@ public class FirebaseRoom {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "userRoomHotListener dataSnapshot: " + dataSnapshot);
                 if (dataSnapshot!=null){
-                    hot = dataSnapshot.getValue(Boolean.class);
-                    listener.onRoomHot(hot);
+                    if (dataSnapshot.getValue() != null){
+                        if (dataSnapshot.getValue() == null){
+                            return;
+                        }
+                        hot = dataSnapshot.getValue(Boolean.class);
+                        listener.onRoomHot(hot);
+                    }
                 }
             }
 
@@ -351,16 +366,22 @@ public class FirebaseRoom {
         messagesListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot == null){
+                    return;
+                }
+
                 Log.d(TAG, "There are " + dataSnapshot.getChildrenCount() + " messages");
                 messages.clear();
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    ChatMessage message = postSnapshot.getValue(ChatMessage.class);
-                    message.setKeyMessage(postSnapshot.getKey());
-                    Log.d(Constants.TAG, "MESSAGE: " + message.getMessageText() + " - " + message.getAndroidID());
-                    //SI LO ESTÁ LEYENDO DEL SERVER, ESO QUIERO DECIR, QUE YA ESTÁ EN EL SERVER, SIEMPRE.
-                    //message.setMessageStatus(Constants.DELIVERED);
-                    messages.add(message);
+                    if (dataSnapshot.getValue() != null){
+                        ChatMessage message = postSnapshot.getValue(ChatMessage.class);
+                        message.setKeyMessage(postSnapshot.getKey());
+                        Log.d(Constants.TAG, "MESSAGE: " + message.getMessageText() + " - " + message.getAndroidID());
+                        //SI LO ESTÁ LEYENDO DEL SERVER, ESO QUIERO DECIR, QUE YA ESTÁ EN EL SERVER, SIEMPRE.
+                        //message.setMessageStatus(Constants.DELIVERED);
+                        messages.add(message);
+                    }
                 }
                 listener.onReadMessages(messages);
             }
@@ -435,6 +456,9 @@ public class FirebaseRoom {
 
                 if (dataSnapshot != null) {
                     Log.d(TAG, "listenReceptorConnection dataSnapshot: " + dataSnapshot);
+                    if (dataSnapshot.getValue() == null){
+                        return;
+                    }
                     himConnection = dataSnapshot.getValue(Connection.class);
                     if (himConnection!=null){
                         listener.onReceptorConnectionChanged(himConnection.getState(), himConnection.getLastConnection());

@@ -15,12 +15,31 @@
     <string name="type_your_message">Introducir mensaje</string>
     <string name="NoRecent">No hay recientes</string>
     <string name="title_activity_search_chat">Random</string>
+    <string name="title_activity_posts">Posts</string>
+
+
+    <string name="chat_init_error_yourself">No puedes iniciar una conversación contigo mismo.</string>
+
+
+    <string name="dialog_title_create_post">Nuevo Post</string>
+    <string name="dialog_input_create_post">Contenido</string>
+    <string name="dialog_post_prefill"></string>
+    <!--<string name="dialog_post_prefill">Chico 21a, buscando chica 18-45.</string>-->
+
+    <string name="action_pick_image">Selecciona imagen para enviar</string>
+    <string name="action_creating_post">Posteando…</string>
+    <string name="post_created">Post Creado</string>
+
 
     <string name="chat_state_writing">Escribiendo…</string>
     <string name="chat_state_waiting">Esperando…</string>
     <string name="chat_state_no_message">Sin mensajes</string>
     <string name="chat_state_pared">Unidos</string>
+    <string name="chat_state_pared_by_post">Unidos por Post</string>
     <string name="chat_state_blocked">Blockeado</string>
+
+
+    <string name="message_say_hi">*Alguien ha iniciado un chat por tu post, dile Hola* </string>
 
     <string name="article_emisor">Yo:</string>
     <string name="article_boy">Él:</string>
@@ -351,4 +370,11 @@
     <string name="country_yemen">Yemen</string>
     <string name="country_zambia">Zambia</string>
     <string name="country_zimbabwe">Zimbabue</string>
+
+
+    <string name="title_activity_full_image">Imagen</string>
+    <string name="dummy_button">REFRESAR</string>
+    <string name="dummy_content">CARGANDO…</string>
+    <string name="action_sending">Enviando…</string>
+    <string name="message_image">*Imagen*</string>
 </resources>

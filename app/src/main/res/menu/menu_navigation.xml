@@ -8,6 +8,10 @@
         <item
             android:id="@+id/nav_credits"
             android:title="@string/nav_credits" />
+        <!--<item
+            android:id="@+id/nav_upload_image"
+            android:title="Subir Imagen" />-->
+
 
     </group>
 

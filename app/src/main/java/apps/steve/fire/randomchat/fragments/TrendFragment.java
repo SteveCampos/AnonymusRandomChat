@@ -49,6 +49,7 @@ public class TrendFragment extends Fragment implements TrendAdapter.OnUserTrendL
         recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
         ButterKnife.bind(this, recyclerView);
         setRecyclerView();
+        setRetainInstance(true);
         return recyclerView;
     }
 

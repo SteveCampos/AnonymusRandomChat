@@ -55,7 +55,8 @@
 
             android:autoLink="web"
             android:text="Rahul Agrawal is a good boy but he does not know what he wants."
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textIsSelectable="true" />
 
 
 

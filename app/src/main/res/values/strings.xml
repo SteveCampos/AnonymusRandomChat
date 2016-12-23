@@ -10,16 +10,31 @@
 
     <string name="chat_author_anonymus">Anonymus</string>
 
+    <string name="chat_init_error_yourself">You can\'t initiate conversation with yourself</string>
+
     <string name="historial_action_chat">Chat</string>
     <string name="type_your_message">Enter msg</string>
     <string name="NoRecent">No recent</string>
     <string name="title_activity_search_chat">Random</string>
+    <string name="title_activity_posts">Posts</string>
+
+    <string name="dialog_title_create_post">New Post</string>
+    <string name="dialog_input_create_post">Content</string>
+    <string name="dialog_post_prefill">Boy 21yo, looking girl.</string>
+    <!--<string name="dialog_post_prefill">Boy 21yo, looking girl.</string>-->
+
+    <string name="action_pick_image">Choose image to send</string>
+    <string name="action_creating_post">Posting…</string>
+    <string name="post_created">Posted</string>
 
     <string name="chat_state_writing">Writing…</string>
     <string name="chat_state_waiting">Waiting…</string>
     <string name="chat_state_no_message">No messages</string>
     <string name="chat_state_pared">Joined</string>
+    <string name="chat_state_pared_by_post">Joined by Post</string>
     <string name="chat_state_blocked">Blocked</string>
+
+    <string name="message_say_hi">*Someone has started a chat for your message, say Hello.* </string>
 
     <string name="article_emisor">Me:</string>
     <string name="article_boy">Him:</string>
@@ -355,4 +370,12 @@
     <string name="country_yemen">Yemen</string>
     <string name="country_zambia">Zambia</string>
     <string name="country_zimbabwe">Zimbabwe</string>
+
+    <string name="title_activity_full_image">Picture</string>
+    <string name="dummy_button">BACK</string>
+    <string name="dummy_content">LOADING…</string>
+    <string name="action_sending">SENDING…</string>
+
+    <string name="message_image">*Picture*</string>
+
 </resources>
